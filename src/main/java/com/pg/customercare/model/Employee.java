@@ -1,5 +1,7 @@
 package com.pg.customercare.model;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,16 +17,7 @@ public class Employee extends Person {
     @JoinColumn(name = "positionSalary_id", nullable = false)
     private PositionSalary positionSalary;
 
-    /*
-     * @ManyToOne
-     * 
-     * @JoinColumn(name = "manager_id")
-     * private Employee manager;
-     * 
-     * @ManyToOne
-     * 
-     * @JoinColumn(name = "supervisor_id")
-     * private Employee supervisor;
-     */
+    private LocalDate hireDate;
+    private String companyEmail;
 
 }

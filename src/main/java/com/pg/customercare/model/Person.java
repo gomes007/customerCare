@@ -20,7 +20,10 @@ public abstract class Person {
     private String cpf;
     private String phone;
     private LocalDate birthDate;
-    private LocalDate hireDate;
+
+    @OneToMany
+    @JoinColumn(name = "address_id")
+    private Address address;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "gender", nullable = true)

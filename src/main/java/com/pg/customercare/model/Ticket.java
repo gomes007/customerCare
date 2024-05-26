@@ -1,6 +1,5 @@
 package com.pg.customercare.model;
 
-
 import java.time.LocalDate;
 
 import com.pg.customercare.model.ENUM.Classification;
@@ -9,7 +8,6 @@ import com.pg.customercare.model.ENUM.Status;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 
 @Data
 @AllArgsConstructor
@@ -22,12 +20,9 @@ public class Ticket {
     @Column(name = "id", nullable = false)
     private Long id;
 
-
     @Column(name = "contact_name")
     private String contactName;
 
-    private String email;
-    private String phone;
     private String subject;
     private String description;
 
@@ -49,9 +44,14 @@ public class Ticket {
     @Column(name = "status", nullable = false)
     private Status status;
 
+    private String solution;
+
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee ticketOwner;
 
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 
 }
