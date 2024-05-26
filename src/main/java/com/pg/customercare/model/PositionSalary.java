@@ -18,6 +18,10 @@ public class PositionSalary {
     private String position;
     private Double salary;
     private Double commission;
-    private String role;
+
+    @ManyToOne
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
 
 }

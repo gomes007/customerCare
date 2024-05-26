@@ -54,4 +54,10 @@ public class EmployeeController {
         return ResponseEntity.ok(employees);
     }
 
+    @PostMapping("/{id}")
+    public ResponseEntity<Employee> updateEmployee(@RequestBody Employee employee) {
+        Employee updatedEmployee = employeeService.updateEmployee(employee);
+        return ResponseEntity.ok(updatedEmployee);
+    }
+
 }
