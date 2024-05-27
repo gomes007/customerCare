@@ -3,6 +3,7 @@ package com.pg.customercare.model;
 import lombok.Data;
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 import com.pg.customercare.model.ENUM.Gender;
 
@@ -21,9 +22,9 @@ public abstract class Person {
     private String phone;
     private LocalDate birthDate;
 
-    @OneToMany
-    @JoinColumn(name = "address_id")
-    private Address address;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "person_id")
+    private List<Address> addresses;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "gender", nullable = true)

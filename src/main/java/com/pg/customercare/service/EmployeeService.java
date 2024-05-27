@@ -12,8 +12,6 @@ import com.pg.customercare.model.PositionSalary;
 import com.pg.customercare.repository.EmployeeRepository;
 import com.pg.customercare.repository.PositionSalaryRepository;
 
-import jakarta.persistence.EntityNotFoundException;
-
 
 import com.pg.customercare.exception.impl.ValidationException;
 
@@ -41,7 +39,7 @@ public class EmployeeService {
         } else {
             // If PositionSalary already has an ID, merge it to ensure it is managed
             positionSalary = positionSalaryRepository.findById(positionSalary.getId())
-                    .orElseThrow(() -> new EntityNotFoundException("PositionSalary not found"));
+                    .orElseThrow(() -> new NotFoundException("PositionSalary not found"));
         }
         employee.setPositionSalary(positionSalary);
 

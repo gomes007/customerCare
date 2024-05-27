@@ -12,8 +12,6 @@ import com.pg.customercare.model.Role;
 import com.pg.customercare.repository.PositionSalaryRepository;
 import com.pg.customercare.repository.RoleRepository;
 
-import jakarta.persistence.EntityNotFoundException;
-
 @Service
 public class PositionSalaryService {
 
@@ -46,7 +44,7 @@ public class PositionSalaryService {
         } else {
             // If Role already has an ID, merge it to ensure it is managed
             role = roleRepository.findById(role.getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Role not found"));
+                    .orElseThrow(() -> new NotFoundException("Role not found"));
         }
         positionSalary.setRole(role);
 
@@ -75,7 +73,7 @@ public class PositionSalaryService {
         } else {
             // If Role already has an ID, ensure it exists
             role = roleRepository.findById(role.getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Role not found"));
+                    .orElseThrow(() -> new NotFoundException("Role not found"));
         }
         positionSalary.setRole(role);
 
