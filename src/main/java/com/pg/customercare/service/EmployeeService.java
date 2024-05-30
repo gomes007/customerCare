@@ -67,6 +67,7 @@ public class EmployeeService {
         if (!employeeRepository.existsById(employee.getId())) {
             throw new NotFoundException("Employee not found with id " + employee.getId());
         }
+        employee.setId(employee.getId());
         return employeeRepository.save(employee);
     }
 
