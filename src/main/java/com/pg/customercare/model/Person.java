@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Past;
 import com.pg.customercare.model.ENUM.Gender;
 
 @Data
@@ -16,10 +18,14 @@ public abstract class Person {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @NotBlank(message = "Name is mandatory")
     private String name;
+
     private String privateEmail;
     private String cpf;
     private String phone;
+
+    @Past(message = "Birth date must be in the past")
     private LocalDate birthDate;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

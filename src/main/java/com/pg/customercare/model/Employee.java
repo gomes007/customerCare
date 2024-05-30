@@ -1,7 +1,7 @@
 package com.pg.customercare.model;
 
 import java.time.LocalDate;
-
+import javax.validation.constraints.Email;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,6 +11,7 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "employee")
+
 public class Employee extends Person {
 
     @ManyToOne
@@ -18,6 +19,7 @@ public class Employee extends Person {
     private PositionSalary positionSalary;
 
     private LocalDate hireDate;
-    private String companyEmail;
 
+    @Email(message = "Company email should be valid")
+    private String companyEmail;
 }

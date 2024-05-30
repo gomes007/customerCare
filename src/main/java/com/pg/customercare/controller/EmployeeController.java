@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pg.customercare.model.Employee;
 import com.pg.customercare.service.EmployeeService;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api/employees")
 public class EmployeeController {
@@ -25,7 +27,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
+    public ResponseEntity<Employee> createEmployee(@Valid @RequestBody Employee employee) {
         Employee savedEmployee = employeeService.saveEmployee(employee);
         return ResponseEntity.ok(savedEmployee);
     }
