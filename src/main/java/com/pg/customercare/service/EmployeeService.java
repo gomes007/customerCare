@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.pg.customercare.exception.impl.NotFoundException;
+import com.pg.customercare.model.Dependent;
 import com.pg.customercare.model.Employee;
 import com.pg.customercare.model.PositionSalary;
 import com.pg.customercare.repository.EmployeeRepository;
@@ -29,8 +30,10 @@ public class EmployeeService {
     public Employee saveEmployee(Employee employee) {
         validateEmployee(employee);
 
-        PositionSalary positionSalary = getPositionSalary(employee.getPositionSalary()); //create or find it
-        employee.setPositionSalary(positionSalary); //set it to employee (merge or persist)
+        PositionSalary positionSalary = getPositionSalary(employee.getPositionSalary()); // create or find it
+        employee.setPositionSalary(positionSalary); // set it to employee (merge or persist)
+
+        setDependentsAndValidate(employee);
 
         return employeeRepository.save(employee);
     }
@@ -53,7 +56,6 @@ public class EmployeeService {
     }
 
     public Employee updateEmployee(Employee employee) {
-
         if (!employeeRepository.existsById(employee.getId())) {
             throw new NotFoundException("Employee not found with id " + employee.getId());
         }
@@ -62,6 +64,8 @@ public class EmployeeService {
 
         PositionSalary positionSalary = getPositionSalary(employee.getPositionSalary());
         employee.setPositionSalary(positionSalary);
+
+        setDependentsAndValidate(employee);
 
         return employeeRepository.save(employee);
     }
@@ -100,6 +104,21 @@ public class EmployeeService {
         } else {
             return positionSalaryRepository.findById(positionSalary.getId())
                     .orElseThrow(() -> new NotFoundException("PositionSalary not found"));
+        }
+    }
+
+    private void validateDependent(Dependent dependent) {
+        if (dependent.getRelationship() == null) {
+            throw new ValidationException("Relationship is required for dependent", new HashMap<>());
+        }
+    }
+
+    private void setDependentsAndValidate(Employee employee) {
+        if (employee.getDependents() != null) {
+            employee.getDependents().forEach(dependent -> {
+                dependent.setEmployee(employee);
+                validateDependent(dependent);
+            });
         }
     }
 
