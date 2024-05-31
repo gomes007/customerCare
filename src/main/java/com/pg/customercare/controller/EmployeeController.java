@@ -2,6 +2,8 @@ package com.pg.customercare.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.pg.customercare.model.Employee;
 import com.pg.customercare.service.EmployeeService;
-
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/employees")
@@ -57,7 +57,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<Employee> updateEmployee(@RequestBody Employee employee) {
+    public ResponseEntity<Employee> updateEmployee(@Valid @RequestBody Employee employee) {
         Employee updatedEmployee = employeeService.updateEmployee(employee);
         return ResponseEntity.ok(updatedEmployee);
     }

@@ -1,14 +1,21 @@
 package com.pg.customercare.model;
 
+import javax.validation.constraints.NotBlank;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.pg.customercare.annotation.ValidHireDate;
+import com.pg.customercare.model.ENUM.RelationshipType;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
-import javax.validation.constraints.NotBlank;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.pg.customercare.model.ENUM.RelationshipType;
 
 @Data
 @AllArgsConstructor
@@ -16,6 +23,7 @@ import com.pg.customercare.model.ENUM.RelationshipType;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "dependent")
+@ValidHireDate
 public class Dependent extends Person {
 
     @ManyToOne

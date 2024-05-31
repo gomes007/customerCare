@@ -4,16 +4,16 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
 import com.pg.customercare.exception.impl.NotFoundException;
+import com.pg.customercare.exception.impl.ValidationException;
 import com.pg.customercare.model.Dependent;
 import com.pg.customercare.model.Employee;
 import com.pg.customercare.model.PositionSalary;
 import com.pg.customercare.repository.EmployeeRepository;
 import com.pg.customercare.repository.PositionSalaryRepository;
-
-import com.pg.customercare.exception.impl.ValidationException;
 
 @Service
 public class EmployeeService {
@@ -96,6 +96,7 @@ public class EmployeeService {
         if (hireDate.isBefore(birthDate)) {
             throw new ValidationException("Hire date must be after birth date", new HashMap<>());
         }
+
     }
 
     private PositionSalary getPositionSalary(PositionSalary positionSalary) {

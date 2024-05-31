@@ -1,8 +1,14 @@
 package com.pg.customercare.model;
 
-import jakarta.persistence.*;
-import lombok.*;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
@@ -16,12 +22,12 @@ public class Address {
     @Column(name = "id", nullable = false)
     private Long id;
 
-        private String street;
-        private String number;
-        private String neighborhood;
-        private String zipCode;
-        private String complement;
-        private String city;
-        private String state;
+    private String street;
+    private String number;
+    private String neighborhood;
+    private String zipCode;
+    private String complement;
+    private String city;
+    private String state;
 
 }
