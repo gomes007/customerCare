@@ -1,13 +1,26 @@
 package com.pg.customercare.model;
 
-import lombok.Data;
-import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
+
 import com.pg.customercare.model.ENUM.Gender;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import lombok.Data;
 
 @Data
 @Entity

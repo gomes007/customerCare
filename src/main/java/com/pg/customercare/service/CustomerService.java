@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.pg.customercare.exception.impl.NotFoundException;
 import com.pg.customercare.model.Customer;
+import com.pg.customercare.model.ENUM.CustomerType;
 import com.pg.customercare.repository.CustomerRepository;
 
 @Service
@@ -17,9 +18,8 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-
-
     public Customer saveCustomer(Customer customer) {
+        validateGender(customer);
         return customerRepository.save(customer);
     }
 
@@ -43,9 +43,16 @@ public class CustomerService {
         if (!customerRepository.existsById(customer.getId())) {
             throw new NotFoundException("Customer not found with id " + customer.getId());
         }
+        validateGender(customer);
         customer.setId(customer.getId());
         return customerRepository.save(customer);
     }
 
-    
+    // Auxiliary method
+    private void validateGender(Customer customer) {
+        if (customer.getCustomerType() == CustomerType.CORPORATE) {
+            customer.setGender(null);
+        }
+    }
+
 }
