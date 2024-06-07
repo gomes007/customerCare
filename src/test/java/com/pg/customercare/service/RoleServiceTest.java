@@ -126,4 +126,42 @@ public class RoleServiceTest {
         assertEquals("ROLE_USER", capturedRole.getName());
     }
 
+    @Test
+    void shouldThrowNotFoundExceptionWhenUpdateNonExistentRole() {
+        // ARRANGE
+        given(roleRepository.existsById(role.getId())).willReturn(false);
+
+        // ACT & ASSERT
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            roleService.updateRole(role);
+        });
+        assertEquals("Role not found with id " + role.getId(), exception.getMessage());
+    }
+
+    @Test
+    void shouldDeleteRole() {
+        // ARRANGE
+        Long roleId = 1L;
+        given(roleRepository.existsById(roleId)).willReturn(true);
+
+        // ACT
+        roleService.deleteRole(roleId);
+
+        // ASSERT
+        then(roleRepository).should().deleteById(roleId);
+    }
+
+    @Test
+    void shouldThrowNotFoundExceptionWhenDeleteNonExistentRole() {
+        // ARRANGE
+        Long roleId = 1L;
+        given(roleRepository.existsById(roleId)).willReturn(false);
+
+        // ACT & ASSERT
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            roleService.deleteRole(roleId);
+        });
+        assertEquals("Role not found with id " + roleId, exception.getMessage());
+    }
+
 }
