@@ -1,0 +1,77 @@
+# Construir a imagem Docker
+docker build -t customercare-app .
+
+# Subir os containers com Docker Compose
+docker-compose up
+
+# Parar e remover containers, incluindo volumes
+docker-compose down -v
+
+# Subir os containers novamente com recompilação
+docker-compose up --build
+
+# Verificar logs do container `app`
+docker logs customercare-app-1
+
+# Verificar logs do container `db`
+docker logs customercare-db-1
+
+# Acessar o shell do container `app`
+docker exec -it customercare-app-1 /bin/sh
+
+#remover imagens
+docker image prune -a
+
+
+#remover tudo
+docker system prune -a --volumes
+
+
+
+Construir a imagem Docker:
+
+bash
+Copiar código
+docker build -t customercare-app .
+Constrói a imagem Docker da aplicação com a tag customercare-app.
+Subir os containers com Docker Compose:
+
+bash
+Copiar código
+docker-compose up
+Sobe os containers baseados no docker-compose.yml usando a imagem construída. Use -d para rodar em segundo plano:
+bash
+Copiar código
+docker-compose up -d
+Verificar logs do container app:
+
+bash
+Copiar código
+docker logs customercare-app-1
+Verifica os logs do container app para garantir que a aplicação está rodando corretamente. Você pode adicionar -f para seguir os logs em tempo real:
+bash
+Copiar código
+docker logs -f customercare-app-1
+Verificar logs do container db:
+
+bash
+Copiar código
+docker logs customercare-db-1
+Verifica os logs do container db para garantir que o banco de dados está funcionando corretamente.
+Acessar o shell do container app (se necessário para depuração):
+
+bash
+Copiar código
+docker exec -it customercare-app-1 /bin/sh
+Acessa o shell do container app para depuração ou verificação manual.
+Parar e remover containers, incluindo volumes:
+
+bash
+Copiar código
+docker-compose down -v
+Para e remove todos os containers e volumes associados.
+Subir os containers novamente com recompilação (quando alterações forem feitas):
+
+bash
+Copiar código
+docker-compose up --build

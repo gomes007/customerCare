@@ -57,3 +57,12 @@ tasks.withType(Test) {
 tasks.named('bootRun') {
     dependsOn tasks.named('test')
 }
+
+// Explicitly set the main class for bootJar
+tasks.named('bootJar') {
+    mainClass.set('com.pg.customercare.CustomerCareApplication')
+}
+
+tasks.named('bootRun') {
+    dependsOn tasks.named('test')
+}
