@@ -11,7 +11,6 @@ import com.pg.customercare.service.EmployeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,15 +19,17 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -95,24 +96,29 @@ public class EmployeeControllerTest {
 
     @Test
     void shouldCreateEmployee() throws Exception {
-        Mockito.when(employeeService.saveEmployee(any(Employee.class), any(MockMultipartFile.class), anyList()))
-               .thenReturn(employee);
+        // ARRANGE
+        given(employeeService.saveEmployee(any(Employee.class), any(MultipartFile.class), any(Map.class))).willReturn(employee);
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/employees")
+        // ACT & ASSERT
+        mockMvc.perform(multipart("/api/employees")
                         .file(file)
                         .file(dependentFile)
-                        .param("name", employee.getName())
-                        .param("positionSalary.id", String.valueOf(positionSalary.getId()))
-                        .param("positionSalary.position", employee.getPositionSalary().getPosition())
-                        .param("positionSalary.salary", String.valueOf(employee.getPositionSalary().getSalary()))
-                        .param("birthDate", employee.getBirthDate().toString())
-                        .param("hireDate", employee.getHireDate().toString())
-                        .param("dependents[0].name", dependent.getName())
-                        .param("dependents[0].birthDate", dependent.getBirthDate().toString())
-                        .param("dependents[0].relationship", dependent.getRelationship().toString())
-                        .contentType("multipart/form-data"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.name").value(employee.getName()));
+                        .param("name", "John Doe")
+                        .param("birthDate", "1990-01-01")
+                        .param("hireDate", "2020-01-01")
+                        .param("positionSalary.id", "1")
+                        .param("dependents[0].id", "2")
+                        .param("dependents[0].name", "Jane Doe")
+                        .param("dependents[0].birthDate", "1992-02-02")
+                        .param("dependents[0].relationship", "SPOUSE")
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("John Doe"))
+                .andExpect(jsonPath("$.positionSalary.position").value("Developer"))
+                .andExpect(jsonPath("$.dependents[0].name").value("Jane Doe"));
+
+        // Verificar se o método saveEmployee do serviço foi chamado com os parâmetros corretos
+        verify(employeeService).saveEmployee(any(Employee.class), any(MultipartFile.class), any(Map.class));
     }
 
     @Test

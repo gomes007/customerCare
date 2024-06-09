@@ -5,6 +5,9 @@ import com.pg.customercare.service.EmployeeService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -30,24 +33,25 @@ public class EmployeeController {
     this.employeeService = employeeService;
   }
 
-  @PostMapping
+    
+ @PostMapping
     public ResponseEntity<Employee> createEmployee(
             @Valid @ModelAttribute Employee employee,
             @RequestParam("file") MultipartFile file,
-            @RequestParam(name = "dependents[0].file", required = false) List<MultipartFile> dependentFiles
+            @RequestParam Map<String, MultipartFile> files
     ) {
         try {
-            // Handle null or empty list of dependent files
-            if (dependentFiles == null) {
-                dependentFiles = new ArrayList<>();
-            }
-
-            Employee savedEmployee = employeeService.saveEmployee(employee, file, dependentFiles);
+            Employee savedEmployee = employeeService.saveEmployee(employee, file, files);
             return ResponseEntity.ok(savedEmployee);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+
+
+
+
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {

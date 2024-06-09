@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+
 @Service
 public class EmployeeService {
 
@@ -36,25 +37,21 @@ public class EmployeeService {
 
   private final String UPLOAD_FOLDER = "C:\\Uploads\\";
 
-@Transactional
-public Employee saveEmployee(Employee employee, MultipartFile file, List<MultipartFile> dependentFiles) throws IOException {
-    validateEmployee(employee);
-    savePhoto(employee, file);
-    
-    PositionSalary positionSalary = getPositionSalary(employee.getPositionSalary());
-    employee.setPositionSalary(positionSalary);
+  @Transactional
+  public Employee saveEmployee(Employee employee, MultipartFile file, Map<String, MultipartFile> files) throws IOException {
+        validateEmployee(employee);
+        savePhoto(employee, file);
+        
+        PositionSalary positionSalary = getPositionSalary(employee.getPositionSalary());
+        employee.setPositionSalary(positionSalary);
 
-    setDependentsAndValidate(employee);
+        setDependentsAndValidate(employee);
 
-    // Save photos for dependents
-    for (int i = 0; i < employee.getDependents().size(); i++) {
-        Dependent dependent = employee.getDependents().get(i);
-        MultipartFile dependentFile = dependentFiles.get(i);
-        savePhoto(dependent, dependentFile); // Save photo for the dependent
-    }
+        // process dependent files
+        processDependentFiles(employee, files);
 
-    return employeeRepository.save(employee);
-}
+        return employeeRepository.save(employee);
+    }    
 
 
 @Transactional
@@ -188,54 +185,40 @@ public void deleteEmployee(Long id) {
     }
   }
 
-  public void savePhoto2(Employee employee, MultipartFile file)
-    throws IOException {
+
+
+  public void savePhoto(Person person, MultipartFile file) throws IOException {
     if (file != null && !file.isEmpty()) {
       String originalFileName = file.getOriginalFilename();
       String photoName = System.currentTimeMillis() + "_" + originalFileName;
       String photoAddress = UPLOAD_FOLDER + photoName;
 
-      // create the directory if it does not exist
+      // Create the directory if it does not exist
       Path directoryPath = Paths.get(UPLOAD_FOLDER);
       if (!Files.exists(directoryPath)) {
         Files.createDirectories(directoryPath);
       }
 
-      // save the file to the directory
+      // Save the file to the directory
       Path filePath = Paths.get(photoAddress);
       Files.write(filePath, file.getBytes());
 
-      // set the photo to the employee
-      employee.setPhotoName(photoName);
-      employee.setPhotoAddress(photoAddress);
+      // Set the photo to the person
+      person.setPhotoName(photoName);
+      person.setPhotoAddress(photoAddress);
     }
   }
 
 
-public void savePhoto(Person person, MultipartFile file) throws IOException {
-    if (file != null && !file.isEmpty()) {
-        String originalFileName = file.getOriginalFilename();
-        String photoName = System.currentTimeMillis() + "_" + originalFileName;
-        String photoAddress = UPLOAD_FOLDER + photoName;
-
-        // Create the directory if it does not exist
-        Path directoryPath = Paths.get(UPLOAD_FOLDER);
-        if (!Files.exists(directoryPath)) {
-            Files.createDirectories(directoryPath);
+  private void processDependentFiles(Employee employee, Map<String, MultipartFile> files) throws IOException {
+        for (Dependent dependent : employee.getDependents()) {
+            String key = "dependents[" + employee.getDependents().indexOf(dependent) + "].file";
+            MultipartFile file = files.get(key);
+            if (file != null && !file.isEmpty()) {
+                savePhoto(dependent, file);
+            }
         }
-
-        // Save the file to the directory
-        Path filePath = Paths.get(photoAddress);
-        Files.write(filePath, file.getBytes());
-
-        // Set the photo to the person
-        person.setPhotoName(photoName);
-        person.setPhotoAddress(photoAddress);
     }
-}
-
-
-
 
 
 }

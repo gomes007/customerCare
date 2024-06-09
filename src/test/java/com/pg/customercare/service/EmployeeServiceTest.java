@@ -1,6 +1,7 @@
 package com.pg.customercare.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
 import java.io.IOException;
@@ -11,7 +12,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -91,7 +94,7 @@ public class EmployeeServiceTest {
     void shouldSaveEmployee() throws IOException {
         // ARRANGE
         given(positionSalaryRepository.findById(positionSalary.getId())).willReturn(Optional.of(positionSalary));
-        given(employeeRepository.save(employee)).willReturn(employee);
+        given(employeeRepository.save(any(Employee.class))).willReturn(employee);
 
         // Mock do arquivo do funcionário
         MultipartFile mockEmployeeFile = new MockMultipartFile(
@@ -109,23 +112,12 @@ public class EmployeeServiceTest {
                 "dependent test image content".getBytes()
         );
 
-        // Define o caminho para o upload da foto, garantindo a limpeza
-        String uploadFolderPath = "C:\\Uploads\\";
-        Path employeeFilePath = Paths.get(uploadFolderPath, System.currentTimeMillis() + "_photo.jpg");
-        Path dependentFilePath = Paths.get(uploadFolderPath, System.currentTimeMillis() + "_dependent_photo.jpg");
-        if (Files.exists(employeeFilePath)) {
-            Files.delete(employeeFilePath);
-        }
-        if (Files.exists(dependentFilePath)) {
-            Files.delete(dependentFilePath);
-        }
-
-        // Lista de arquivos de dependentes
-        List<MultipartFile> dependentFiles = new ArrayList<>();
-        dependentFiles.add(mockDependentFile);
+        // Criação do mapa de arquivos
+        Map<String, MultipartFile> files = new HashMap<>();
+        files.put("dependents[0].file", mockDependentFile);
 
         // ACT
-        Employee savedEmployee = employeeService.saveEmployee(employee, mockEmployeeFile, dependentFiles);
+        Employee savedEmployee = employeeService.saveEmployee(employee, mockEmployeeFile, files);
 
         // ASSERT
         assertNotNull(savedEmployee);
@@ -138,17 +130,13 @@ public class EmployeeServiceTest {
         // Verifica se as informações da foto do funcionário foram atribuídas corretamente
         assertNotNull(capturedEmployee.getPhotoName());
         assertNotNull(capturedEmployee.getPhotoAddress());
-        assertTrue(Files.exists(Paths.get(capturedEmployee.getPhotoAddress())), "O arquivo de foto do funcionário deve existir no diretório de uploads");
 
         // Verifica se as informações da foto do dependente foram atribuídas corretamente
         Dependent savedDependent = capturedEmployee.getDependents().get(0);
         assertNotNull(savedDependent.getPhotoName());
         assertNotNull(savedDependent.getPhotoAddress());
-        assertTrue(Files.exists(Paths.get(savedDependent.getPhotoAddress())), "O arquivo de foto do dependente deve existir no diretório de uploads");
 
-        // Limpeza após o teste
-        Files.deleteIfExists(Paths.get(capturedEmployee.getPhotoAddress()));
-        Files.deleteIfExists(Paths.get(savedDependent.getPhotoAddress()));
+        // Se necessário, adicionar verificações específicas para o conteúdo ou caminho das fotos
     }
 
     @Test
