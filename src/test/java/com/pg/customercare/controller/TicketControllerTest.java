@@ -2,7 +2,6 @@ package com.pg.customercare.controller;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDate;
@@ -15,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pg.customercare.model.Customer;
@@ -58,12 +59,25 @@ public class TicketControllerTest {
     @Test
     void shouldCreateTicket() throws Exception {
         // ARRANGE
-        given(ticketService.createTicket(any(Ticket.class))).willReturn(ticket);
+        given(ticketService.createTicket(any(Ticket.class), any())).willReturn(ticket);
+
+        // Mock multipart file
+        MockMultipartFile file = new MockMultipartFile(
+                "files",
+                "test.txt",
+                MediaType.TEXT_PLAIN_VALUE,
+                "Test content".getBytes());
 
         // ACT & ASSERT
-        mockMvc.perform(post("/api/tickets")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticket)))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/tickets")
+                .file(file)
+                .param("id", String.valueOf(ticket.getId()))
+                .param("customer.id", String.valueOf(customer.getId()))
+                .param("classification", ticket.getClassification().name())
+                .param("priority", ticket.getPriority().name())
+                .param("status", ticket.getStatus().name())
+                .param("openingDate", ticket.getOpeningDate().toString())
+                .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(ticket.getId()))
                 .andExpect(jsonPath("$.customer.id").value(customer.getId()))
@@ -79,7 +93,7 @@ public class TicketControllerTest {
         given(ticketService.updateTicket(any(Ticket.class))).willReturn(ticket);
 
         // ACT & ASSERT
-        mockMvc.perform(post("/api/tickets/{id}", ticket.getId())
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/tickets/{id}", ticket.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(ticket)))
                 .andExpect(status().isOk())
@@ -97,7 +111,7 @@ public class TicketControllerTest {
         willDoNothing().given(ticketService).deleteTicket(ticket.getId());
 
         // ACT & ASSERT
-        mockMvc.perform(delete("/api/tickets/{id}", ticket.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/tickets/{id}", ticket.getId()))
                 .andExpect(status().isNoContent());
     }
 
@@ -109,7 +123,7 @@ public class TicketControllerTest {
         given(ticketService.getAllTickets()).willReturn(tickets);
 
         // ACT & ASSERT
-        mockMvc.perform(get("/api/tickets")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/tickets")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(ticket.getId()))
@@ -127,7 +141,7 @@ public class TicketControllerTest {
         given(ticketService.getTicketById(id)).willReturn(ticket);
 
         // ACT & ASSERT
-        mockMvc.perform(get("/api/tickets/{id}", id)
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/tickets/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(ticket.getId()))

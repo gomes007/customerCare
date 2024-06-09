@@ -5,9 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,16 +98,14 @@ public class EmployeeServiceTest {
                 "file",
                 "photo.jpg",
                 "image/jpeg",
-                "test image content".getBytes()
-        );
+                "test image content".getBytes());
 
         // Mock do arquivo do dependente
         MultipartFile mockDependentFile = new MockMultipartFile(
                 "dependents[0].file",
                 "dependent_photo.jpg",
                 "image/jpeg",
-                "dependent test image content".getBytes()
-        );
+                "dependent test image content".getBytes());
 
         // Criação do mapa de arquivos
         Map<String, MultipartFile> files = new HashMap<>();
@@ -127,16 +122,19 @@ public class EmployeeServiceTest {
         assertEquals("John Doe", capturedEmployee.getName());
         assertEquals(positionSalary, capturedEmployee.getPositionSalary());
 
-        // Verifica se as informações da foto do funcionário foram atribuídas corretamente
+        // Verifica se as informações da foto do funcionário foram atribuídas
+        // corretamente
         assertNotNull(capturedEmployee.getPhotoName());
         assertNotNull(capturedEmployee.getPhotoAddress());
 
-        // Verifica se as informações da foto do dependente foram atribuídas corretamente
+        // Verifica se as informações da foto do dependente foram atribuídas
+        // corretamente
         Dependent savedDependent = capturedEmployee.getDependents().get(0);
         assertNotNull(savedDependent.getPhotoName());
         assertNotNull(savedDependent.getPhotoAddress());
 
-        // Se necessário, adicionar verificações específicas para o conteúdo ou caminho das fotos
+        // Se necessário, adicionar verificações específicas para o conteúdo ou caminho
+        // das fotos
     }
 
     @Test

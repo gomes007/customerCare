@@ -1,10 +1,10 @@
 package com.pg.customercare.controller;
 
-import com.pg.customercare.model.Employee;
-import com.pg.customercare.service.EmployeeService;
 import java.util.List;
 import java.util.Map;
+
 import javax.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.pg.customercare.model.Employee;
+import com.pg.customercare.service.EmployeeService;
+
 @RestController
 @RequestMapping("/api/employees")
 public class EmployeeController {
@@ -27,15 +30,14 @@ public class EmployeeController {
     this.employeeService = employeeService;
   }
 
-@PostMapping
-public ResponseEntity<Employee> createEmployee(
-        @Valid @ModelAttribute Employee employee,
-        @RequestParam("file") MultipartFile file,
-        @RequestParam Map<String, MultipartFile> files
-) {
-    Employee savedEmployee = employeeService.saveEmployee(employee, file, files);
+  @PostMapping()
+  public ResponseEntity<Employee> createEmployee(
+      @ModelAttribute Employee employee,
+      @RequestParam(value = "photo", required = false) MultipartFile photo,
+      @RequestParam Map<String, MultipartFile> files) {
+    Employee savedEmployee = employeeService.saveEmployee(employee, photo, files);
     return ResponseEntity.ok(savedEmployee);
-}
+  }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
@@ -57,16 +59,14 @@ public ResponseEntity<Employee> createEmployee(
 
   @GetMapping("/position/{position}")
   public ResponseEntity<List<Employee>> getEmployeesByPosition(
-    @PathVariable String position
-  ) {
+      @PathVariable String position) {
     List<Employee> employees = employeeService.getEmployeesByPosition(position);
     return ResponseEntity.ok(employees);
   }
 
   @PostMapping("/{id}")
   public ResponseEntity<Employee> updateEmployee(
-    @Valid @RequestBody Employee employee
-  ) {
+      @Valid @RequestBody Employee employee) {
     Employee updatedEmployee = employeeService.updateEmployee(employee);
     return ResponseEntity.ok(updatedEmployee);
   }

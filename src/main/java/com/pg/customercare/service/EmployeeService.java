@@ -1,5 +1,18 @@
 package com.pg.customercare.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.pg.customercare.exception.impl.BadRequestException;
 import com.pg.customercare.exception.impl.InternalServerException;
 import com.pg.customercare.exception.impl.NotFoundException;
@@ -10,17 +23,6 @@ import com.pg.customercare.model.Person;
 import com.pg.customercare.model.PositionSalary;
 import com.pg.customercare.repository.EmployeeRepository;
 import com.pg.customercare.repository.PositionSalaryRepository;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class EmployeeService {
@@ -29,9 +31,7 @@ public class EmployeeService {
   private PositionSalaryRepository positionSalaryRepository;
 
   public EmployeeService(
-    EmployeeRepository employeeRepository,
-    PositionSalaryRepository positionSalaryRepository
-  ) {
+      EmployeeRepository employeeRepository, PositionSalaryRepository positionSalaryRepository) {
     this.employeeRepository = employeeRepository;
     this.positionSalaryRepository = positionSalaryRepository;
   }
@@ -39,22 +39,18 @@ public class EmployeeService {
   private final String UPLOAD_FOLDER = "C:\\Uploads\\";
 
   @Transactional
-  public Employee saveEmployee(
-    Employee employee,
-    MultipartFile file,
-    Map<String, MultipartFile> files
-  ) {
+  public Employee saveEmployee(Employee employee, MultipartFile file, Map<String, MultipartFile> files) {
     try {
-      validateEmployee(employee);
-      savePhoto(employee, file);
 
-      PositionSalary positionSalary = getPositionSalary(
-        employee.getPositionSalary()
-      );
+      validateEmployee(employee);
+
+      if (file != null && !file.isEmpty()) {
+        savePhoto(employee, file);
+      }
+
+      PositionSalary positionSalary = getPositionSalary(employee.getPositionSalary());
       if (positionSalary == null) {
-        throw new NotFoundException(
-          "PositionSalary not found for the given ID"
-        );
+        throw new NotFoundException("PositionSalary not found for the given ID");
       }
       employee.setPositionSalary(positionSalary);
 
@@ -68,25 +64,17 @@ public class EmployeeService {
     } catch (NotFoundException e) {
       throw e;
     } catch (IOException e) {
-      throw new InternalServerException(
-        "Failed to save employee due to file handling error",
-        e
-      );
+      throw new InternalServerException("Failed to save employee due to file handling error", e);
     } catch (Exception e) {
-      throw new BadRequestException(
-        "Failed to save employee due to an unexpected error",
-        e
-      );
+      throw new BadRequestException("Failed to save employee due to an unexpected error", e);
     }
   }
 
   @Transactional
   public void deleteEmployee(Long id) {
     Employee employee = employeeRepository
-      .findById(id)
-      .orElseThrow(() ->
-        new NotFoundException("Employee not found with id " + id)
-      );
+        .findById(id)
+        .orElseThrow(() -> new NotFoundException("Employee not found with id " + id));
 
     if (employee.getPhotoAddress() != null) {
       Path photoPath = Paths.get(employee.getPhotoAddress());
@@ -94,37 +82,26 @@ public class EmployeeService {
         Files.deleteIfExists(photoPath);
       } catch (IOException e) {
         throw new InternalServerException(
-          "Failed to delete employee photo at address: " +
-          employee.getPhotoAddress(),
-          e
-        );
+            "Failed to delete employee photo at address: " + employee.getPhotoAddress(), e);
       }
     }
 
-    employee
-      .getDependents()
-      .forEach(dependent -> {
-        if (dependent.getPhotoAddress() != null) {
-          Path dependentPhotoPath = Paths.get(dependent.getPhotoAddress());
-          try {
-            Files.deleteIfExists(dependentPhotoPath);
-          } catch (IOException e) {
-            throw new InternalServerException(
-              "Failed to delete dependent photo at address: " +
-              dependent.getPhotoAddress(),
-              e
-            );
-          }
+    employee.getDependents().forEach(dependent -> {
+      if (dependent.getPhotoAddress() != null) {
+        Path dependentPhotoPath = Paths.get(dependent.getPhotoAddress());
+        try {
+          Files.deleteIfExists(dependentPhotoPath);
+        } catch (IOException e) {
+          throw new InternalServerException(
+              "Failed to delete dependent photo at address: " + dependent.getPhotoAddress(), e);
         }
-      });
+      }
+    });
 
     try {
       employeeRepository.deleteById(id);
     } catch (Exception e) {
-      throw new InternalServerException(
-        "Failed to delete employee with id " + id,
-        e
-      );
+      throw new InternalServerException("Failed to delete employee with id " + id, e);
     }
   }
 
@@ -134,24 +111,20 @@ public class EmployeeService {
 
   public Employee getEmployeeById(Long id) {
     return employeeRepository
-      .findById(id)
-      .orElseThrow(() ->
-        new NotFoundException("Employee not found with id " + id)
-      );
+        .findById(id)
+        .orElseThrow(() -> new NotFoundException("Employee not found with id " + id));
   }
 
   public Employee updateEmployee(Employee employee) {
     if (!employeeRepository.existsById(employee.getId())) {
       throw new NotFoundException(
-        "Employee not found with id " + employee.getId()
-      );
+          "Employee not found with id " + employee.getId());
     }
 
     validateEmployee(employee);
 
     PositionSalary positionSalary = getPositionSalary(
-      employee.getPositionSalary()
-    );
+        employee.getPositionSalary());
     employee.setPositionSalary(positionSalary);
 
     setDependentsAndValidate(employee);
@@ -165,9 +138,8 @@ public class EmployeeService {
       Map<String, Object> errorDetails = new HashMap<>();
       errorDetails.put("position", position);
       throw new ValidationException(
-        "No employees found with position: " + position,
-        errorDetails
-      );
+          "No employees found with position: " + position,
+          errorDetails);
     }
     return employees;
   }
@@ -176,9 +148,8 @@ public class EmployeeService {
   private void validateEmployee(Employee employee) {
     if (employee.getPositionSalary() == null) {
       throw new ValidationException(
-        "Position salary is required",
-        new HashMap<>()
-      );
+          "Position salary is required",
+          new HashMap<>());
     }
 
     LocalDate birthDate = employee.getBirthDate();
@@ -186,16 +157,14 @@ public class EmployeeService {
 
     if (birthDate == null || !birthDate.isBefore(LocalDate.now())) {
       throw new ValidationException(
-        "Birth date must be in the past",
-        new HashMap<>()
-      );
+          "Birth date must be in the past",
+          new HashMap<>());
     }
 
     if (hireDate.isBefore(birthDate)) {
       throw new ValidationException(
-        "Hire date must be after birth date",
-        new HashMap<>()
-      );
+          "Hire date must be after birth date",
+          new HashMap<>());
     }
   }
 
@@ -204,33 +173,38 @@ public class EmployeeService {
       return positionSalaryRepository.save(positionSalary);
     } else {
       return positionSalaryRepository
-        .findById(positionSalary.getId())
-        .orElseThrow(() -> new NotFoundException("PositionSalary not found"));
+          .findById(positionSalary.getId())
+          .orElseThrow(() -> new NotFoundException("PositionSalary not found"));
     }
   }
 
   private void validateDependent(Dependent dependent) {
     if (dependent.getRelationship() == null) {
       throw new ValidationException(
-        "Relationship is required for dependent",
-        new HashMap<>()
-      );
+          "Relationship is required for dependent",
+          new HashMap<>());
     }
   }
 
   private void setDependentsAndValidate(Employee employee) {
     if (employee.getDependents() != null) {
       employee
-        .getDependents()
-        .forEach(dependent -> {
-          dependent.setEmployee(employee);
-          validateDependent(dependent);
-        });
+          .getDependents()
+          .forEach(dependent -> {
+            dependent.setEmployee(employee);
+            validateDependent(dependent);
+          });
     }
   }
 
-  public void savePhoto(Person person, MultipartFile file) throws IOException {
+  private void savePhoto(Person person, MultipartFile file) throws IOException {
+    final long MAX_SIZE = 5 * 1024 * 1024; // 5MB
+
     if (file != null && !file.isEmpty()) {
+      if (file.getSize() > MAX_SIZE) {
+        throw new ValidationException(
+            "File size exceeds the maximum limit of " + MAX_SIZE / (1024 / 1024) + "MB.", new HashMap<>());
+      }
       String originalFileName = file.getOriginalFilename();
       String photoName = System.currentTimeMillis() + "_" + originalFileName;
       String photoAddress = UPLOAD_FOLDER + photoName;
@@ -251,13 +225,9 @@ public class EmployeeService {
     }
   }
 
-  private void processDependentFiles(
-    Employee employee,
-    Map<String, MultipartFile> files
-  ) throws IOException {
+  private void processDependentFiles(Employee employee, Map<String, MultipartFile> files) throws IOException {
     for (Dependent dependent : employee.getDependents()) {
-      String key =
-        "dependents[" + employee.getDependents().indexOf(dependent) + "].file";
+      String key = "dependents[" + employee.getDependents().indexOf(dependent) + "].file";
       MultipartFile file = files.get(key);
       if (file != null && !file.isEmpty()) {
         savePhoto(dependent, file);

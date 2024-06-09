@@ -1,6 +1,7 @@
 package com.pg.customercare.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
@@ -16,13 +17,16 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.pg.customercare.exception.impl.NotFoundException;
+import com.pg.customercare.exception.impl.ValidationException;
 import com.pg.customercare.model.Customer;
 import com.pg.customercare.model.Ticket;
 import com.pg.customercare.model.ENUM.Classification;
 import com.pg.customercare.model.ENUM.Priority;
 import com.pg.customercare.model.ENUM.Status;
+import com.pg.customercare.repository.TicketFilesRepository;
 import com.pg.customercare.repository.TicketRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +39,9 @@ public class TicketServiceTest {
     private TicketRepository ticketRepository;
 
     @Mock
+    private TicketFilesRepository ticketFilesRepository;
+
+    @Mock
     private Ticket ticket;
 
     @Mock
@@ -42,6 +49,9 @@ public class TicketServiceTest {
 
     @Captor
     private ArgumentCaptor<Ticket> ticketCaptor;
+
+    @Mock
+    private MultipartFile file;
 
     @BeforeEach
     void setUp() {
@@ -56,6 +66,10 @@ public class TicketServiceTest {
         ticket.setPriority(Priority.HIGH);
         ticket.setStatus(Status.OPEN);
         ticket.setOpeningDate(LocalDate.of(2023, 6, 6));
+
+        given(file.getOriginalFilename()).willReturn("test.txt");
+        given(file.getSize()).willReturn(1000L); // 1KB
+        given(file.isEmpty()).willReturn(false);
     }
 
     @Test
@@ -64,13 +78,14 @@ public class TicketServiceTest {
         given(ticketRepository.save(ticket)).willReturn(ticket);
 
         // ACT
-        Ticket result = ticketService.createTicket(ticket);
+        Ticket result = ticketService.createTicket(ticket, new MultipartFile[] { file });
 
         // ASSERT
         assertNotNull(result);
         assertEquals(Status.OPEN, result.getStatus());
         then(ticketRepository).should().save(ticketCaptor.capture());
         assertEquals(ticket, ticketCaptor.getValue());
+        then(ticketFilesRepository).should().saveAll(any());
     }
 
     @Test
@@ -176,7 +191,7 @@ public class TicketServiceTest {
 
         // ACT & ASSERT
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            ticketService.createTicket(ticket);
+            ticketService.createTicket(ticket, new MultipartFile[] { file });
         });
         assertEquals("Customer is required", exception.getMessage());
     }
@@ -188,8 +203,20 @@ public class TicketServiceTest {
 
         // ACT & ASSERT
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            ticketService.createTicket(ticket);
+            ticketService.createTicket(ticket, new MultipartFile[] { file });
         });
         assertEquals("Opening date must be in the past", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowValidationExceptionWhenFileSizeExceedsLimit() {
+        // ARRANGE
+        given(file.getSize()).willReturn(20 * 1024 * 1024L); // 20MB
+
+        // ACT & ASSERT
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
+            ticketService.createTicket(ticket, new MultipartFile[] { file });
+        });
+        assertEquals("File size exceeds the maximum limit of 10MB.", exception.getMessage());
     }
 }

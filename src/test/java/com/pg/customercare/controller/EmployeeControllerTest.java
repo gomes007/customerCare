@@ -7,7 +7,6 @@ import com.pg.customercare.model.PositionSalary;
 import com.pg.customercare.model.ENUM.RelationshipType;
 import com.pg.customercare.service.EmployeeService;
 
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +17,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -82,42 +80,40 @@ public class EmployeeControllerTest {
                 "file",
                 "photo.jpg",
                 "image/jpeg",
-                "image content".getBytes()
-        );
+                "image content".getBytes());
 
         dependentFile = new MockMultipartFile(
                 "dependents[0].file",
                 "dependent_photo.jpg",
                 "image/jpeg",
-                "dependent image content".getBytes()
-        );
+                "dependent image content".getBytes());
     }
-    
 
     @Test
     void shouldCreateEmployee() throws Exception {
         // ARRANGE
-        given(employeeService.saveEmployee(any(Employee.class), any(MultipartFile.class), any(Map.class))).willReturn(employee);
+        given(employeeService.saveEmployee(any(Employee.class), any(MultipartFile.class), any(Map.class)))
+                .willReturn(employee);
 
         // ACT & ASSERT
         mockMvc.perform(multipart("/api/employees")
-                        .file(file)
-                        .file(dependentFile)
-                        .param("name", "John Doe")
-                        .param("birthDate", "1990-01-01")
-                        .param("hireDate", "2020-01-01")
-                        .param("positionSalary.id", "1")
-                        .param("dependents[0].id", "2")
-                        .param("dependents[0].name", "Jane Doe")
-                        .param("dependents[0].birthDate", "1992-02-02")
-                        .param("dependents[0].relationship", "SPOUSE")
-                )
+                .file(file)
+                .file(dependentFile)
+                .param("name", "John Doe")
+                .param("birthDate", "1990-01-01")
+                .param("hireDate", "2020-01-01")
+                .param("positionSalary.id", "1")
+                .param("dependents[0].id", "2")
+                .param("dependents[0].name", "Jane Doe")
+                .param("dependents[0].birthDate", "1992-02-02")
+                .param("dependents[0].relationship", "SPOUSE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("John Doe"))
                 .andExpect(jsonPath("$.positionSalary.position").value("Developer"))
                 .andExpect(jsonPath("$.dependents[0].name").value("Jane Doe"));
 
-        // Verificar se o método saveEmployee do serviço foi chamado com os parâmetros corretos
+        // Verificar se o método saveEmployee do serviço foi chamado com os parâmetros
+        // corretos
         verify(employeeService).saveEmployee(any(Employee.class), any(MultipartFile.class), any(Map.class));
     }
 
