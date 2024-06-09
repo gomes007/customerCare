@@ -1,24 +1,33 @@
 package com.pg.customercare.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pg.customercare.model.Dependent;
 import com.pg.customercare.model.Employee;
 import com.pg.customercare.model.PositionSalary;
+import com.pg.customercare.model.ENUM.RelationshipType;
 import com.pg.customercare.service.EmployeeService;
+
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -39,6 +48,10 @@ public class EmployeeControllerTest {
     private Employee employee;
     private PositionSalary positionSalary;
 
+    private MockMultipartFile file;
+    private MockMultipartFile dependentFile;
+    private Dependent dependent;
+
     @BeforeEach
     void setUp() {
         positionSalary = new PositionSalary();
@@ -52,17 +65,54 @@ public class EmployeeControllerTest {
         employee.setPositionSalary(positionSalary);
         employee.setBirthDate(LocalDate.of(1990, 1, 1));
         employee.setHireDate(LocalDate.of(2020, 1, 1));
+
+        dependent = new Dependent();
+        dependent.setId(2L);
+        dependent.setName("Jane Doe");
+        dependent.setBirthDate(LocalDate.of(1992, 2, 2));
+        dependent.setRelationship(RelationshipType.SPOUSE);
+        dependent.setEmployee(employee);
+
+        List<Dependent> dependents = new ArrayList<>();
+        dependents.add(dependent);
+        employee.setDependents(dependents);
+
+        file = new MockMultipartFile(
+                "file",
+                "photo.jpg",
+                "image/jpeg",
+                "image content".getBytes()
+        );
+
+        dependentFile = new MockMultipartFile(
+                "dependents[0].file",
+                "dependent_photo.jpg",
+                "image/jpeg",
+                "dependent image content".getBytes()
+        );
     }
+    
 
     @Test
     void shouldCreateEmployee() throws Exception {
-        given(employeeService.saveEmployee(employee)).willReturn(employee);
+        Mockito.when(employeeService.saveEmployee(any(Employee.class), any(MockMultipartFile.class), anyList()))
+               .thenReturn(employee);
 
-        mockMvc.perform(post("/api/employees")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(employee)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(employee.getName()));
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/employees")
+                        .file(file)
+                        .file(dependentFile)
+                        .param("name", employee.getName())
+                        .param("positionSalary.id", String.valueOf(positionSalary.getId()))
+                        .param("positionSalary.position", employee.getPositionSalary().getPosition())
+                        .param("positionSalary.salary", String.valueOf(employee.getPositionSalary().getSalary()))
+                        .param("birthDate", employee.getBirthDate().toString())
+                        .param("hireDate", employee.getHireDate().toString())
+                        .param("dependents[0].name", dependent.getName())
+                        .param("dependents[0].birthDate", dependent.getBirthDate().toString())
+                        .param("dependents[0].relationship", dependent.getRelationship().toString())
+                        .contentType("multipart/form-data"))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.name").value(employee.getName()));
     }
 
     @Test

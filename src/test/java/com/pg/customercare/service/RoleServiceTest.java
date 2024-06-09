@@ -39,6 +39,7 @@ public class RoleServiceTest {
     @Captor
     private ArgumentCaptor<Role> roleCaptor;
 
+    @SuppressWarnings("unused")
     private Validator validator;
 
     @BeforeEach

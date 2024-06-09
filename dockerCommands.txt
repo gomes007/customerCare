@@ -3,6 +3,7 @@ docker build -t customercare-app .
 
 # Subir os containers com Docker Compose
 docker-compose up
+docker-compose up -d (compose)
 
 # Parar e remover containers, incluindo volumes
 docker-compose down -v

@@ -1,0 +1,23 @@
+#Gerar o Arquivo JAR
+./gradlew clean build
+
+#Instalar e Configurar AWS CLI
+aws configure
+AWS Access Key ID [None]: <Your-Access-Key-ID>
+AWS Secret Access Key [None]: <Your-Secret-Access-Key>
+Default region name [None]: us-east-1
+Default output format [None]: json
+
+
+#verificar se a configuração foi bem-sucedida
+aws sts get-caller-identity
+
+
+#Instale o EB CLI para gerenciar aplicações Elastic Beanstalk
+pip install awsebcli
+
+#Inicializar Elastic Beanstalk No diretório raiz do seu projeto
+eb init
+
+#No diretório do seu projeto com nome desejado
+eb create my-environment

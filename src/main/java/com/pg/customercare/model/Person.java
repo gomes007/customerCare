@@ -51,4 +51,7 @@ public abstract class Person {
 
     private String otherInformation;
 
+    private String photoName;
+    private String photoAddress;
+
 }
