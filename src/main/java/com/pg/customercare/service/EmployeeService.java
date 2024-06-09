@@ -1,5 +1,7 @@
 package com.pg.customercare.service;
 
+import com.pg.customercare.exception.impl.BadRequestException;
+import com.pg.customercare.exception.impl.InternalServerException;
 import com.pg.customercare.exception.impl.NotFoundException;
 import com.pg.customercare.exception.impl.ValidationException;
 import com.pg.customercare.model.Dependent;
@@ -20,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-
 @Service
 public class EmployeeService {
 
@@ -38,51 +39,94 @@ public class EmployeeService {
   private final String UPLOAD_FOLDER = "C:\\Uploads\\";
 
   @Transactional
-  public Employee saveEmployee(Employee employee, MultipartFile file, Map<String, MultipartFile> files) throws IOException {
-        validateEmployee(employee);
-        savePhoto(employee, file);
-        
-        PositionSalary positionSalary = getPositionSalary(employee.getPositionSalary());
-        employee.setPositionSalary(positionSalary);
+  public Employee saveEmployee(
+    Employee employee,
+    MultipartFile file,
+    Map<String, MultipartFile> files
+  ) {
+    try {
+      validateEmployee(employee);
+      savePhoto(employee, file);
 
-        setDependentsAndValidate(employee);
+      PositionSalary positionSalary = getPositionSalary(
+        employee.getPositionSalary()
+      );
+      if (positionSalary == null) {
+        throw new NotFoundException(
+          "PositionSalary not found for the given ID"
+        );
+      }
+      employee.setPositionSalary(positionSalary);
 
-        // process dependent files
-        processDependentFiles(employee, files);
+      setDependentsAndValidate(employee);
 
-        return employeeRepository.save(employee);
-    }    
+      processDependentFiles(employee, files);
 
+      return employeeRepository.save(employee);
+    } catch (ValidationException e) {
+      throw e;
+    } catch (NotFoundException e) {
+      throw e;
+    } catch (IOException e) {
+      throw new InternalServerException(
+        "Failed to save employee due to file handling error",
+        e
+      );
+    } catch (Exception e) {
+      throw new BadRequestException(
+        "Failed to save employee due to an unexpected error",
+        e
+      );
+    }
+  }
 
-@Transactional
-public void deleteEmployee(Long id) {
-    Employee employee = employeeRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException("Employee not found with id " + id));
+  @Transactional
+  public void deleteEmployee(Long id) {
+    Employee employee = employeeRepository
+      .findById(id)
+      .orElseThrow(() ->
+        new NotFoundException("Employee not found with id " + id)
+      );
 
-    // Delete the photo of the employee if it exists
     if (employee.getPhotoAddress() != null) {
-        Path photoPath = Paths.get(employee.getPhotoAddress());
-        try {
-            Files.deleteIfExists(photoPath);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to delete employee photo: " + employee.getPhotoAddress(), e);
-        }
+      Path photoPath = Paths.get(employee.getPhotoAddress());
+      try {
+        Files.deleteIfExists(photoPath);
+      } catch (IOException e) {
+        throw new InternalServerException(
+          "Failed to delete employee photo at address: " +
+          employee.getPhotoAddress(),
+          e
+        );
+      }
     }
 
-    // Delete photos of dependents if they exist
-    employee.getDependents().forEach(dependent -> {
-      if (dependent.getPhotoAddress() != null) {
-        Path dependentPhotoPath = Paths.get(dependent.getPhotoAddress());
-        try {
-          Files.deleteIfExists(dependentPhotoPath);
-        } catch (IOException e) {
-          throw new RuntimeException("Failed to delete dependent photo: " + dependent.getPhotoAddress(), e);
+    employee
+      .getDependents()
+      .forEach(dependent -> {
+        if (dependent.getPhotoAddress() != null) {
+          Path dependentPhotoPath = Paths.get(dependent.getPhotoAddress());
+          try {
+            Files.deleteIfExists(dependentPhotoPath);
+          } catch (IOException e) {
+            throw new InternalServerException(
+              "Failed to delete dependent photo at address: " +
+              dependent.getPhotoAddress(),
+              e
+            );
+          }
         }
-      }
-    });
+      });
 
-    employeeRepository.deleteById(id);
-}
+    try {
+      employeeRepository.deleteById(id);
+    } catch (Exception e) {
+      throw new InternalServerException(
+        "Failed to delete employee with id " + id,
+        e
+      );
+    }
+  }
 
   public List<Employee> getAllEmployees() {
     return employeeRepository.findAll();
@@ -185,8 +229,6 @@ public void deleteEmployee(Long id) {
     }
   }
 
-
-
   public void savePhoto(Person person, MultipartFile file) throws IOException {
     if (file != null && !file.isEmpty()) {
       String originalFileName = file.getOriginalFilename();
@@ -209,16 +251,17 @@ public void deleteEmployee(Long id) {
     }
   }
 
-
-  private void processDependentFiles(Employee employee, Map<String, MultipartFile> files) throws IOException {
-        for (Dependent dependent : employee.getDependents()) {
-            String key = "dependents[" + employee.getDependents().indexOf(dependent) + "].file";
-            MultipartFile file = files.get(key);
-            if (file != null && !file.isEmpty()) {
-                savePhoto(dependent, file);
-            }
-        }
+  private void processDependentFiles(
+    Employee employee,
+    Map<String, MultipartFile> files
+  ) throws IOException {
+    for (Dependent dependent : employee.getDependents()) {
+      String key =
+        "dependents[" + employee.getDependents().indexOf(dependent) + "].file";
+      MultipartFile file = files.get(key);
+      if (file != null && !file.isEmpty()) {
+        savePhoto(dependent, file);
+      }
     }
-
-
+  }
 }

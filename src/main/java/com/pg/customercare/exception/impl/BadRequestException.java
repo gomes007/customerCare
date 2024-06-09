@@ -4,8 +4,10 @@ import com.pg.customercare .exception.WebException;
 import org.springframework.http.HttpStatus;
 
 public class BadRequestException extends WebException {
-
-    public BadRequestException(final String message) {
-        super(message, HttpStatus.BAD_REQUEST);
+  public BadRequestException(final String message) {
+    super(message, HttpStatus.BAD_REQUEST);
+  }
+    public BadRequestException(final String message, Throwable cause) {
+        super(message, HttpStatus.BAD_REQUEST, cause);
     }
 }

@@ -2,15 +2,9 @@ package com.pg.customercare.controller;
 
 import com.pg.customercare.model.Employee;
 import com.pg.customercare.service.EmployeeService;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import javax.validation.Valid;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,25 +27,15 @@ public class EmployeeController {
     this.employeeService = employeeService;
   }
 
-    
- @PostMapping
-    public ResponseEntity<Employee> createEmployee(
-            @Valid @ModelAttribute Employee employee,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam Map<String, MultipartFile> files
-    ) {
-        try {
-            Employee savedEmployee = employeeService.saveEmployee(employee, file, files);
-            return ResponseEntity.ok(savedEmployee);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
-
-
-
-
-
+@PostMapping
+public ResponseEntity<Employee> createEmployee(
+        @Valid @ModelAttribute Employee employee,
+        @RequestParam("file") MultipartFile file,
+        @RequestParam Map<String, MultipartFile> files
+) {
+    Employee savedEmployee = employeeService.saveEmployee(employee, file, files);
+    return ResponseEntity.ok(savedEmployee);
+}
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {

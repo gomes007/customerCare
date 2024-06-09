@@ -14,6 +14,12 @@ public abstract class WebException extends RuntimeException {
         this.errorRef = null;
     }
 
+    public WebException(final String message, final HttpStatus status, Throwable cause) {
+        super(message, cause);
+        this.status = status;
+        this.errorRef = null;
+    }
+
     public WebException(final String message, final HttpStatus status, Map<String, Object> errorRef) {
         super(message);
         this.status = status;
@@ -28,3 +34,4 @@ public abstract class WebException extends RuntimeException {
         return this.errorRef;
     }
 }
+
