@@ -38,6 +38,7 @@ public class TicketService {
 
     @Transactional
     public Ticket createTicket(Ticket ticket, MultipartFile[] files) {
+
         ticket.setStatus(Status.OPEN);
 
         validateTicket(ticket);
