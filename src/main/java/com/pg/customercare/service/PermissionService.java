@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.pg.customercare.exception.impl.NotFoundException;
 import com.pg.customercare.model.Permission;
 import com.pg.customercare.repository.PermissionRepository;
+import com.pg.customercare.util.Response;
 
 @Service
 public class PermissionService {
@@ -40,8 +41,15 @@ public class PermissionService {
                 .orElseThrow(() -> new NotFoundException("Permission not found with id " + id));
     }
 
-    public Page<Permission> getAllPermissions(Pageable pageable) {
-        return permissionRepository.findAll(pageable);
+    public Response<Permission> getAllPermissions(Pageable pageable) {
+        Page<Permission> page = permissionRepository.findAll(pageable);
+
+        return Response.<Permission>builder()
+                .items(page.getContent())
+                .itemsPerPage((long) pageable.getPageSize())
+                .currentPage((long) pageable.getPageNumber())
+                .totalRecordsQuantity(page.getTotalElements())
+                .build();
     }
 
 }

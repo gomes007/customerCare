@@ -1,7 +1,6 @@
 package com.pg.customercare.controller;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.pg.customercare.model.Permission;
 import com.pg.customercare.service.PermissionService;
+import com.pg.customercare.util.PaginationUtil;
+import com.pg.customercare.util.Response;
 
 @RestController
 @RequestMapping("/api/permissions")
@@ -33,10 +34,11 @@ public class PermissionController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<Permission>> getAllPermissions(
+    public ResponseEntity<Response<Permission>> getAllPermissions(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Page<Permission> permissions = permissionService.getAllPermissions(PageRequest.of(page, size));
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PaginationUtil.createPageRequest(page, size);
+        Response<Permission> permissions = permissionService.getAllPermissions(pageable);
         return ResponseEntity.ok(permissions);
     }
 
