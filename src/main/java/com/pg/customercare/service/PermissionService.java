@@ -1,7 +1,7 @@
 package com.pg.customercare.service;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.pg.customercare.exception.impl.NotFoundException;
@@ -40,8 +40,8 @@ public class PermissionService {
                 .orElseThrow(() -> new NotFoundException("Permission not found with id " + id));
     }
 
-    public List<Permission> getAllPermissions() {
-        return permissionRepository.findAll();
+    public Page<Permission> getAllPermissions(Pageable pageable) {
+        return permissionRepository.findAll(pageable);
     }
 
 }
