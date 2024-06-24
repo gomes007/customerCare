@@ -1,0 +1,21 @@
+[33m0a74852[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m chore: Refactor PermissionController to use PaginationUtil and Response
+[33mead5e1c[m pagination
+[33me07972a[m PermissionController
+[33ma979c7f[m TicketFiles
+[33mea81993[m chore: Refactor exception classes and add constructors with cause parameter
+[33m072f617[m processDependentFiles
+[33m1b50f5b[m employee photo
+[33m72f3114[m employee photo
+[33m62e6a62[m container with docker
+[33md5aa27e[m tests finished
+[33md10e448[m employeeServiceTest and roleServiceTest
+[33m753ba13[m CRUD Ticket
+[33mb323f44[m customer and annotations
+[33m69c316b[m customer
+[33mabd18da[m dependent
+[33m071359c[m annotations
+[33m0681582[m customer
+[33m7f40695[m second commit
+[33m8c1e2c8[m second commit
+[33mf78a36a[m second commit
+[33md5ebd25[m first commit

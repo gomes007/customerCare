@@ -1,5 +1,6 @@
 package com.pg.customercare.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.Entity;
@@ -14,7 +15,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor
@@ -30,9 +33,13 @@ public class Role {
     private String name;
 
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
-    private Set<User> users;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<User> users = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "role_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    private Set<Permission> permissions;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Permission> permissions = new HashSet<>();
 }
