@@ -2,6 +2,8 @@ package com.pg.customercare.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -40,6 +42,7 @@ public class User {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
+    @JsonIgnore
     private Role role;
 
     @Column(nullable = true)
@@ -47,5 +50,4 @@ public class User {
 
     @Column(nullable = true)
     private LocalDateTime resetTokenExpiryDate;
-
 }

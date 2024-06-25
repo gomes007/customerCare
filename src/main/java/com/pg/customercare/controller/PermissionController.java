@@ -42,7 +42,7 @@ public class PermissionController {
         return ResponseEntity.ok(permissions);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Permission> updatePermission(@RequestBody Permission permission, @PathVariable Long id) {
         permission.setId(id);
         Permission updatedPermission = permissionService.updatePermission(permission);
