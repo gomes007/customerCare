@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -19,10 +21,17 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import com.pg.customercare.dto.RoleNameDTO;
 import com.pg.customercare.exception.impl.NotFoundException;
+import com.pg.customercare.model.Permission;
 import com.pg.customercare.model.Role;
 import com.pg.customercare.repository.RoleRepository;
+import com.pg.customercare.util.Response;
 
 @ExtendWith(MockitoExtension.class)
 public class RoleServiceTest {
@@ -99,15 +108,37 @@ public class RoleServiceTest {
     void shouldGetAllRoles() {
         // ARRANGE
         List<Role> roles = new ArrayList<>();
+        Role role = new Role();
+        role.setId(1L);
+        role.setName("RoleName");
+
+        Set<Permission> permissions = new HashSet<>();
+        Permission permission = new Permission();
+        permission.setId(1L);
+        permission.setName("PermissionName");
+        permissions.add(permission);
+
+        role.setPermissions(permissions);
         roles.add(role);
-        given(roleRepository.findAll()).willReturn(roles);
+
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Role> rolePage = new PageImpl<>(roles, pageable, roles.size());
+
+        given(roleRepository.findAll(pageable)).willReturn(rolePage);
 
         // ACT
-        List<Role> rolesFound = roleService.getAllRoles();
+        Response<RoleNameDTO> response = roleService.getAllRoles(pageable);
 
         // ASSERT
-        assertEquals(1, rolesFound.size());
-        assertEquals(role, rolesFound.get(0));
+        assertEquals(1, response.getItems().size());
+        assertEquals(role.getId(), response.getItems().get(0).getId());
+        assertEquals(role.getName(), response.getItems().get(0).getName());
+        assertEquals(1, response.getItems().get(0).getPermissions().size());
+        assertEquals(permission.getId(), response.getItems().get(0).getPermissions().get(0).getId());
+        assertEquals(permission.getName(), response.getItems().get(0).getPermissions().get(0).getName());
+        assertEquals(roles.size(), response.getTotalRecordsQuantity());
+        assertEquals(pageable.getPageSize(), response.getItemsPerPage());
+        assertEquals(pageable.getPageNumber(), response.getCurrentPage());
     }
 
     @Test

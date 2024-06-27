@@ -1,5 +1,9 @@
 package com.pg.customercare.service;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -37,7 +41,6 @@ public class PermissionService {
         permissionRepository.deleteById(id);
     }
 
-
     public Permission updatePermission(Permission permission) {
         if (!permissionRepository.existsById(permission.getId())) {
             throw new NotFoundException("Permission not found with id " + permission.getId());
@@ -57,8 +60,20 @@ public class PermissionService {
     public Response<Permission> getAllPermissions(Pageable pageable) {
         Page<Permission> page = permissionRepository.findAll(pageable);
 
+        // Transforming to ensure that the return is consistent with the expected
+        // structure
+        List<Permission> permissions = page.getContent().stream().map(permission -> {
+            Permission transformedPermission = new Permission();
+            transformedPermission.setId(permission.getId());
+            transformedPermission.setName(permission.getName());
+
+            // Removing the 'roles' structure to keep the response as needed
+            transformedPermission.setRoles(Collections.emptySet());
+            return transformedPermission;
+        }).collect(Collectors.toList());
+
         return Response.<Permission>builder()
-                .items(page.getContent())
+                .items(permissions)
                 .itemsPerPage((long) pageable.getPageSize())
                 .currentPage((long) pageable.getPageNumber())
                 .totalRecordsQuantity(page.getTotalElements())
