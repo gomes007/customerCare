@@ -2,15 +2,22 @@ package com.pg.customercare.service;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.pg.customercare.dto.PositionSalaryDTO;
 import com.pg.customercare.exception.impl.NotFoundException;
 import com.pg.customercare.exception.impl.ValidationException;
 import com.pg.customercare.model.PositionSalary;
 import com.pg.customercare.model.Role;
 import com.pg.customercare.repository.PositionSalaryRepository;
 import com.pg.customercare.repository.RoleRepository;
+import com.pg.customercare.util.Response;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class PositionSalaryService {
@@ -23,15 +30,27 @@ public class PositionSalaryService {
         this.roleRepository = roleRepository;
     }
 
-    public List<PositionSalary> getAllPositionSalaries() {
-        return positionSalaryRepository.findAll();
+    public Response<PositionSalaryDTO> getAllPositionSalaries(Pageable pageable) {
+        Page<PositionSalary> page = positionSalaryRepository.findAll(pageable);
+        return convertPageToResponse(page, pageable);
+    }
+
+    public Response<PositionSalaryDTO> getPositionSalariesByPosition(String position, Pageable pageable) {
+        Page<PositionSalary> page = positionSalaryRepository.findByPositionContainingIgnoreCase(position, pageable);
+        return convertPageToResponse(page, pageable);
+    }
+
+    public Response<PositionSalaryDTO> getPositionSalariesByRoleName(String roleName, Pageable pageable) {
+        Page<PositionSalary> page = positionSalaryRepository.findByRoleName(roleName, pageable);
+        return convertPageToResponse(page, pageable);
     }
 
     public PositionSalary getPositionSalaryById(Long id) {
         return positionSalaryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Position not found with id " + id));
+                .orElseThrow(() -> new NotFoundException("Position Salary not found with id " + id));
     }
 
+    @Transactional
     public PositionSalary savePositionSalary(PositionSalary positionSalary) {
         if (positionSalary.getRole() == null) {
             throw new ValidationException("Role is required", new HashMap<>());
@@ -58,6 +77,7 @@ public class PositionSalaryService {
         positionSalaryRepository.deleteById(id);
     }
 
+    @Transactional
     public PositionSalary updatePositionSalary(PositionSalary positionSalary) {
         if (!positionSalaryRepository.existsById(positionSalary.getId())) {
             throw new NotFoundException("Position not found with id " + positionSalary.getId());
@@ -78,6 +98,25 @@ public class PositionSalaryService {
         positionSalary.setRole(role);
 
         return positionSalaryRepository.save(positionSalary);
+    }
+
+    // auxiliary methods
+    private Response<PositionSalaryDTO> convertPageToResponse(Page<PositionSalary> page, Pageable pageable) {
+        List<PositionSalaryDTO> positionSalaries = page.getContent().stream()
+                .map(positionSalary -> new PositionSalaryDTO(
+                        positionSalary.getId(),
+                        positionSalary.getPosition(),
+                        positionSalary.getSalary(),
+                        positionSalary.getCommission(),
+                        positionSalary.getRole().getName()))
+                .collect(Collectors.toList());
+
+        return Response.<PositionSalaryDTO>builder()
+                .items(positionSalaries)
+                .itemsPerPage((long) pageable.getPageSize())
+                .currentPage((long) pageable.getPageNumber())
+                .totalRecordsQuantity(page.getTotalElements())
+                .build();
     }
 
 }

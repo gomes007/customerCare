@@ -56,6 +56,24 @@ public class RoleController {
         return ResponseEntity.ok(roles);
     }
 
+    @GetMapping("/search/by-name")
+    public Response<RoleNameDTO> getRolesByName(
+            @RequestParam String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PaginationUtil.createPageRequest(page, size);
+        return roleService.getRolesByName(name, pageable);
+    }
+
+    @GetMapping("/search/by-permission")
+    public Response<RoleNameDTO> getRolesByPermissionName(
+            @RequestParam String permissionName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PaginationUtil.createPageRequest(page, size);
+        return roleService.getRolesByPermissionName(permissionName, pageable);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Role> getRoleById(@PathVariable Long id) {
         Role role = roleService.getRoleById(id);

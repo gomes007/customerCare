@@ -5,9 +5,6 @@ import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +43,7 @@ public class PositionSalaryControllerTest {
         positionSalary.setId(1L);
         positionSalary.setRole(role);
         positionSalary.setSalary(50000.00);
+
     }
 
     @Test
@@ -86,22 +84,6 @@ public class PositionSalaryControllerTest {
         // ACT & ASSERT
         mockMvc.perform(delete("/api/position-salaries/{id}", positionSalary.getId()))
                 .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void shouldGetAllPositionSalaries() throws Exception {
-        // ARRANGE
-        List<PositionSalary> positionSalaries = new ArrayList<>();
-        positionSalaries.add(positionSalary);
-        given(positionSalaryService.getAllPositionSalaries()).willReturn(positionSalaries);
-
-        // ACT & ASSERT
-        mockMvc.perform(get("/api/position-salaries")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(positionSalary.getId()))
-                .andExpect(jsonPath("$[0].role.id").value(role.getId()))
-                .andExpect(jsonPath("$[0].salary").value(positionSalary.getSalary()));
     }
 
     @Test

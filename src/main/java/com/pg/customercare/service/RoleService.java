@@ -51,6 +51,16 @@ public class RoleService {
                 .build();
     }
 
+    public Response<RoleNameDTO> getRolesByName(String name, Pageable pageable) {
+        Page<Role> page = roleRepository.findByNameContainingIgnoreCase(name, pageable);
+        return convertPageToResponse(page, pageable);
+    }
+
+    public Response<RoleNameDTO> getRolesByPermissionName(String permissionName, Pageable pageable) {
+        Page<Role> page = roleRepository.findByPermissionName(permissionName, pageable);
+        return convertPageToResponse(page, pageable);
+    }
+
     public Role getRoleById(Long id) {
         return roleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Role not found with id " + id));
@@ -102,6 +112,25 @@ public class RoleService {
         }
 
         return roleRepository.save(existingRole);
+    }
+
+    // auxiliary method
+    private Response<RoleNameDTO> convertPageToResponse(Page<Role> page, Pageable pageable) {
+        List<RoleNameDTO> roles = page.getContent().stream()
+                .map(role -> {
+                    List<PermissionDTO> permissions = role.getPermissions().stream()
+                            .map(permission -> new PermissionDTO(permission.getId(), permission.getName()))
+                            .collect(Collectors.toList());
+                    return new RoleNameDTO(role.getId(), role.getName(), permissions);
+                })
+                .collect(Collectors.toList());
+
+        return Response.<RoleNameDTO>builder()
+                .items(roles)
+                .itemsPerPage((long) pageable.getPageSize())
+                .currentPage((long) pageable.getPageNumber())
+                .totalRecordsQuantity(page.getTotalElements())
+                .build();
     }
 
 }

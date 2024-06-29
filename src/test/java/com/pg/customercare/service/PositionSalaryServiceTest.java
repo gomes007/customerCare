@@ -15,13 +15,19 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import com.pg.customercare.dto.PositionSalaryDTO;
 import com.pg.customercare.exception.impl.NotFoundException;
 import com.pg.customercare.exception.impl.ValidationException;
 import com.pg.customercare.model.PositionSalary;
 import com.pg.customercare.model.Role;
 import com.pg.customercare.repository.PositionSalaryRepository;
 import com.pg.customercare.repository.RoleRepository;
+import com.pg.customercare.util.Response;
 
 @ExtendWith(MockitoExtension.class)
 public class PositionSalaryServiceTest {
@@ -64,14 +70,20 @@ public class PositionSalaryServiceTest {
         // ARRANGE
         List<PositionSalary> positionSalaries = new ArrayList<>();
         positionSalaries.add(positionSalary);
-        given(positionSalaryRepository.findAll()).willReturn(positionSalaries);
+        Page<PositionSalary> page = new PageImpl<>(positionSalaries);
+        Pageable pageable = PageRequest.of(0, 20);
+        given(positionSalaryRepository.findAll(pageable)).willReturn(page);
 
         // ACT
-        List<PositionSalary> result = positionSalaryService.getAllPositionSalaries();
+        Response<PositionSalaryDTO> result = positionSalaryService.getAllPositionSalaries(pageable);
 
         // ASSERT
-        assertEquals(1, result.size());
-        assertEquals(positionSalary, result.get(0));
+        assertEquals(1, result.getItems().size());
+        assertEquals(positionSalary.getId(), result.getItems().get(0).getId());
+        assertEquals(positionSalary.getPosition(), result.getItems().get(0).getPosition());
+        assertEquals(positionSalary.getSalary(), result.getItems().get(0).getSalary());
+        assertEquals(positionSalary.getCommission(), result.getItems().get(0).getCommission());
+        assertEquals(positionSalary.getRole().getName(), result.getItems().get(0).getRoleName());
     }
 
     @Test
