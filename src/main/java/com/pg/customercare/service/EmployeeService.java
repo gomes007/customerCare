@@ -39,32 +39,28 @@ public class EmployeeService {
   private final String UPLOAD_FOLDER = "C:\\Uploads\\";
 
   @Transactional
-  public Employee saveEmployee(Employee employee, MultipartFile file, Map<String, MultipartFile> files) {
+  public Employee saveEmployee(Employee employee, MultipartFile photo, Map<String, MultipartFile> files)
+      throws Exception {
     try {
-
       validateEmployee(employee);
 
-      if (file != null && !file.isEmpty()) {
-        savePhoto(employee, file);
+      if (photo != null && !photo.isEmpty()) {
+        savePhoto(employee, photo);
       }
 
       PositionSalary positionSalary = getPositionSalary(employee.getPositionSalary());
-      if (positionSalary == null) {
-        throw new NotFoundException("PositionSalary not found for the given ID");
-      }
       employee.setPositionSalary(positionSalary);
 
       setDependentsAndValidate(employee);
 
-      processDependentFiles(employee, files);
+      if (employee.getDependents() != null && !employee.getDependents().isEmpty() && files != null
+          && !files.isEmpty()) {
+        processDependentFiles(employee, files);
+      }
 
       return employeeRepository.save(employee);
-    } catch (ValidationException e) {
+    } catch (ValidationException | NotFoundException | IOException e) {
       throw e;
-    } catch (NotFoundException e) {
-      throw e;
-    } catch (IOException e) {
-      throw new InternalServerException("Failed to save employee due to file handling error", e);
     } catch (Exception e) {
       throw new BadRequestException("Failed to save employee due to an unexpected error", e);
     }

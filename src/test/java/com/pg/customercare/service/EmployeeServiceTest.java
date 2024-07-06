@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,7 +87,7 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    void shouldSaveEmployee() throws IOException {
+    void shouldSaveEmployee() throws Exception {
         // ARRANGE
         given(positionSalaryRepository.findById(positionSalary.getId())).willReturn(Optional.of(positionSalary));
         given(employeeRepository.save(any(Employee.class))).willReturn(employee);

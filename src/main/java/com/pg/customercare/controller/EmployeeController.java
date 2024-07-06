@@ -34,7 +34,7 @@ public class EmployeeController {
   public ResponseEntity<Employee> createEmployee(
       @ModelAttribute Employee employee,
       @RequestParam(value = "photo", required = false) MultipartFile photo,
-      @RequestParam Map<String, MultipartFile> files) {
+      @RequestParam Map<String, MultipartFile> files) throws Exception {
     Employee savedEmployee = employeeService.saveEmployee(employee, photo, files);
     return ResponseEntity.ok(savedEmployee);
   }
