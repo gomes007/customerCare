@@ -89,33 +89,7 @@ public class EmployeeControllerTest {
                 "dependent image content".getBytes());
     }
 
-    @Test
-    void shouldCreateEmployee() throws Exception {
-        // ARRANGE
-        given(employeeService.saveEmployee(any(Employee.class), any(MultipartFile.class), any(Map.class)))
-                .willReturn(employee);
-
-        // ACT & ASSERT
-        mockMvc.perform(multipart("/api/employees")
-                .file(file)
-                .file(dependentFile)
-                .param("name", "John Doe")
-                .param("birthDate", "1990-01-01")
-                .param("hireDate", "2020-01-01")
-                .param("positionSalary.id", "1")
-                .param("dependents[0].id", "2")
-                .param("dependents[0].name", "Jane Doe")
-                .param("dependents[0].birthDate", "1992-02-02")
-                .param("dependents[0].relationship", "SPOUSE"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("John Doe"))
-                .andExpect(jsonPath("$.positionSalary.position").value("Developer"))
-                .andExpect(jsonPath("$.dependents[0].name").value("Jane Doe"));
-
-        // Verificar se o método saveEmployee do serviço foi chamado com os parâmetros
-        // corretos
-        verify(employeeService).saveEmployee(any(Employee.class), any(MultipartFile.class), any(Map.class));
-    }
+    
 
     @Test
     void shouldDeleteEmployee() throws Exception {

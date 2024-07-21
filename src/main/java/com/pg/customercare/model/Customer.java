@@ -42,4 +42,5 @@ public class Customer extends Person {
   @Enumerated(EnumType.STRING)
   @Column(name = "customer_type", nullable = false)
   private CustomerType customerType;
+
 }

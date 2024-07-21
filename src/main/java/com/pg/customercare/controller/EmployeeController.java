@@ -24,50 +24,50 @@ import com.pg.customercare.service.EmployeeService;
 @RequestMapping("/api/employees")
 public class EmployeeController {
 
-  private final EmployeeService employeeService;
+    private final EmployeeService employeeService;
 
-  public EmployeeController(EmployeeService employeeService) {
-    this.employeeService = employeeService;
-  }
+    public EmployeeController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
 
-  @PostMapping()
-  public ResponseEntity<Employee> createEmployee(
-      @ModelAttribute Employee employee,
-      @RequestParam(value = "photo", required = false) MultipartFile photo,
-      @RequestParam Map<String, MultipartFile> files) throws Exception {
-    Employee savedEmployee = employeeService.saveEmployee(employee, photo, files);
-    return ResponseEntity.ok(savedEmployee);
-  }
+    @PostMapping()
+    public ResponseEntity<Employee> createEmployee(
+            @ModelAttribute Employee employee,
+            @RequestParam(value = "photo", required = false) MultipartFile photo,
+            @RequestParam Map<String, MultipartFile> files) throws Exception {
+        Employee savedEmployee = employeeService.saveEmployee(employee, photo, files);
+        return ResponseEntity.ok(savedEmployee);
+    }
 
-  @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
-    employeeService.deleteEmployee(id);
-    return ResponseEntity.noContent().build();
-  }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+        employeeService.deleteEmployee(id);
+        return ResponseEntity.noContent().build();
+    }
 
-  @GetMapping
-  public ResponseEntity<List<Employee>> getAllEmployees() {
-    List<Employee> employees = employeeService.getAllEmployees();
-    return ResponseEntity.ok(employees);
-  }
+    @GetMapping
+    public ResponseEntity<List<Employee>> getAllEmployees() {
+        List<Employee> employees = employeeService.getAllEmployees();
+        return ResponseEntity.ok(employees);
+    }
 
-  @GetMapping("/{id}")
-  public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
-    Employee employee = employeeService.getEmployeeById(id);
-    return ResponseEntity.ok(employee);
-  }
+    @GetMapping("/{id}")
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
+        Employee employee = employeeService.getEmployeeById(id);
+        return ResponseEntity.ok(employee);
+    }
 
-  @GetMapping("/position/{position}")
-  public ResponseEntity<List<Employee>> getEmployeesByPosition(
-      @PathVariable String position) {
-    List<Employee> employees = employeeService.getEmployeesByPosition(position);
-    return ResponseEntity.ok(employees);
-  }
+    @GetMapping("/position/{position}")
+    public ResponseEntity<List<Employee>> getEmployeesByPosition(
+            @PathVariable String position) {
+        List<Employee> employees = employeeService.getEmployeesByPosition(position);
+        return ResponseEntity.ok(employees);
+    }
 
-  @PostMapping("/{id}")
-  public ResponseEntity<Employee> updateEmployee(
-      @Valid @RequestBody Employee employee) {
-    Employee updatedEmployee = employeeService.updateEmployee(employee);
-    return ResponseEntity.ok(updatedEmployee);
-  }
+    @PostMapping("/{id}")
+    public ResponseEntity<Employee> updateEmployee(
+            @Valid @RequestBody Employee employee) {
+        Employee updatedEmployee = employeeService.updateEmployee(employee);
+        return ResponseEntity.ok(updatedEmployee);
+    }
 }

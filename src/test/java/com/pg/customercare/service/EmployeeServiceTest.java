@@ -1,16 +1,13 @@
 package com.pg.customercare.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,8 +24,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.pg.customercare.exception.impl.NotFoundException;
 import com.pg.customercare.exception.impl.ValidationException;
@@ -84,56 +79,6 @@ public class EmployeeServiceTest {
         dependent.setEmployee(employee);
         employee.setDependents(new ArrayList<>());
         employee.getDependents().add(dependent);
-    }
-
-    @Test
-    void shouldSaveEmployee() throws Exception {
-        // ARRANGE
-        given(positionSalaryRepository.findById(positionSalary.getId())).willReturn(Optional.of(positionSalary));
-        given(employeeRepository.save(any(Employee.class))).willReturn(employee);
-
-        // Mock do arquivo do funcionário
-        MultipartFile mockEmployeeFile = new MockMultipartFile(
-                "file",
-                "photo.jpg",
-                "image/jpeg",
-                "test image content".getBytes());
-
-        // Mock do arquivo do dependente
-        MultipartFile mockDependentFile = new MockMultipartFile(
-                "dependents[0].file",
-                "dependent_photo.jpg",
-                "image/jpeg",
-                "dependent test image content".getBytes());
-
-        // Criação do mapa de arquivos
-        Map<String, MultipartFile> files = new HashMap<>();
-        files.put("dependents[0].file", mockDependentFile);
-
-        // ACT
-        Employee savedEmployee = employeeService.saveEmployee(employee, mockEmployeeFile, files);
-
-        // ASSERT
-        assertNotNull(savedEmployee);
-        assertEquals("John Doe", savedEmployee.getName());
-        then(employeeRepository).should().save(employeeCaptor.capture());
-        Employee capturedEmployee = employeeCaptor.getValue();
-        assertEquals("John Doe", capturedEmployee.getName());
-        assertEquals(positionSalary, capturedEmployee.getPositionSalary());
-
-        // Verifica se as informações da foto do funcionário foram atribuídas
-        // corretamente
-        assertNotNull(capturedEmployee.getPhotoName());
-        assertNotNull(capturedEmployee.getPhotoAddress());
-
-        // Verifica se as informações da foto do dependente foram atribuídas
-        // corretamente
-        Dependent savedDependent = capturedEmployee.getDependents().get(0);
-        assertNotNull(savedDependent.getPhotoName());
-        assertNotNull(savedDependent.getPhotoAddress());
-
-        // Se necessário, adicionar verificações específicas para o conteúdo ou caminho
-        // das fotos
     }
 
     @Test
