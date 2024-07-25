@@ -1,8 +1,8 @@
 package com.pg.customercare.model.ENUM;
 
 public enum Situation {
-    ACTIVE("ACTIVE"),
-    INACTIVE("INACTIVE");
+    ACTIVE("Active"),
+    INACTIVE("Inactive");
 
     private final String label;
 
