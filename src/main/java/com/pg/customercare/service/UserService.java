@@ -40,7 +40,7 @@ public class UserService implements UserDetailsService {
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())
-                .password(user.getPassword())  // A senha deve estar codificada
+                .password(user.getPassword())
                 .authorities(authorities)
                 .build();
     }
