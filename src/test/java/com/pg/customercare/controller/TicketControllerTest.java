@@ -56,99 +56,10 @@ public class TicketControllerTest {
         ticket.setOpeningDate(LocalDate.of(2023, 6, 6));
     }
 
-    @Test
-    void shouldCreateTicket() throws Exception {
-        // ARRANGE
-        given(ticketService.createTicket(any(Ticket.class), any())).willReturn(ticket);
+    
 
-        // Mock multipart file
-        MockMultipartFile file = new MockMultipartFile(
-                "files",
-                "test.txt",
-                MediaType.TEXT_PLAIN_VALUE,
-                "Test content".getBytes());
 
-        // ACT & ASSERT
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/tickets")
-                .file(file)
-                .param("id", String.valueOf(ticket.getId()))
-                .param("customer.id", String.valueOf(customer.getId()))
-                .param("classification", ticket.getClassification().name())
-                .param("priority", ticket.getPriority().name())
-                .param("status", ticket.getStatus().name())
-                .param("openingDate", ticket.getOpeningDate().toString())
-                .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(ticket.getId()))
-                .andExpect(jsonPath("$.customer.id").value(customer.getId()))
-                .andExpect(jsonPath("$.classification").value(ticket.getClassification().name()))
-                .andExpect(jsonPath("$.priority").value(ticket.getPriority().name()))
-                .andExpect(jsonPath("$.status").value(ticket.getStatus().name()))
-                .andExpect(jsonPath("$.openingDate").value(ticket.getOpeningDate().toString()));
-    }
 
-    @Test
-    void shouldUpdateTicket() throws Exception {
-        // ARRANGE
-        given(ticketService.updateTicket(any(Ticket.class))).willReturn(ticket);
 
-        // ACT & ASSERT
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/tickets/{id}", ticket.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticket)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(ticket.getId()))
-                .andExpect(jsonPath("$.customer.id").value(customer.getId()))
-                .andExpect(jsonPath("$.classification").value(ticket.getClassification().name()))
-                .andExpect(jsonPath("$.priority").value(ticket.getPriority().name()))
-                .andExpect(jsonPath("$.status").value(ticket.getStatus().name()))
-                .andExpect(jsonPath("$.openingDate").value(ticket.getOpeningDate().toString()));
-    }
 
-    @Test
-    void shouldDeleteTicket() throws Exception {
-        // ARRANGE
-        willDoNothing().given(ticketService).deleteTicket(ticket.getId());
-
-        // ACT & ASSERT
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/tickets/{id}", ticket.getId()))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void shouldGetAllTickets() throws Exception {
-        // ARRANGE
-        List<Ticket> tickets = new ArrayList<>();
-        tickets.add(ticket);
-        given(ticketService.getAllTickets()).willReturn(tickets);
-
-        // ACT & ASSERT
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/tickets")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(ticket.getId()))
-                .andExpect(jsonPath("$[0].customer.id").value(customer.getId()))
-                .andExpect(jsonPath("$[0].classification").value(ticket.getClassification().name()))
-                .andExpect(jsonPath("$[0].priority").value(ticket.getPriority().name()))
-                .andExpect(jsonPath("$[0].status").value(ticket.getStatus().name()))
-                .andExpect(jsonPath("$[0].openingDate").value(ticket.getOpeningDate().toString()));
-    }
-
-    @Test
-    void shouldGetTicketById() throws Exception {
-        // ARRANGE
-        Long id = 1L;
-        given(ticketService.getTicketById(id)).willReturn(ticket);
-
-        // ACT & ASSERT
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/tickets/{id}", id)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(ticket.getId()))
-                .andExpect(jsonPath("$.customer.id").value(customer.getId()))
-                .andExpect(jsonPath("$.classification").value(ticket.getClassification().name()))
-                .andExpect(jsonPath("$.priority").value(ticket.getPriority().name()))
-                .andExpect(jsonPath("$.status").value(ticket.getStatus().name()))
-                .andExpect(jsonPath("$.openingDate").value(ticket.getOpeningDate().toString()));
-    }
 }

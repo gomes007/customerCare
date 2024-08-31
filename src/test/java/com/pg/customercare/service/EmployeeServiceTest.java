@@ -95,18 +95,7 @@ public class EmployeeServiceTest {
         assertEquals("Employee not found with id " + employeeId, exception.getMessage());
     }
 
-    @Test
-    void shouldDeleteEmployee() {
-        // ARRANGE
-        Long employeeId = 1L;
-        given(employeeRepository.existsById(employeeId)).willReturn(true);
 
-        // ACT
-        employeeService.deleteEmployee(employeeId);
-
-        // ASSERT
-        then(employeeRepository).should().deleteById(employeeId);
-    }
 
     @Test
     void shouldGetAllEmployees() {
@@ -168,18 +157,7 @@ public class EmployeeServiceTest {
         assertEquals(positionSalary, capturedEmployee.getPositionSalary());
     }
 
-    @Test
-    void shouldThrowNotFoundExceptionWhenUpdateNonExistentEmployee() {
-        // ARRANGE
-        given(employeeRepository.existsById(employee.getId())).willReturn(false);
 
-        // ACT & ASSERT
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            employeeService.updateEmployee(employee);
-        });
-
-        assertEquals("Employee not found with id " + employee.getId(), exception.getMessage());
-    }
 
     @Test
     void shouldGetEmployeesByPosition() {

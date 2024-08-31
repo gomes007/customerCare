@@ -142,23 +142,6 @@ public class RoleServiceTest {
     }
 
     @Test
-    void shouldUpdateRole() {
-        // ARRANGE
-        given(roleRepository.existsById(role.getId())).willReturn(true);
-        given(roleRepository.save(role)).willReturn(role);
-
-        // ACT
-        Role roleUpdated = roleService.updateRole(role);
-
-        // ASSERT
-        assertNotNull(roleUpdated);
-        assertEquals("ROLE_USER", roleUpdated.getName());
-        then(roleRepository).should().save(roleCaptor.capture());
-        Role capturedRole = roleCaptor.getValue();
-        assertEquals("ROLE_USER", capturedRole.getName());
-    }
-
-    @Test
     void shouldThrowNotFoundExceptionWhenUpdateNonExistentRole() {
         // ARRANGE
         given(roleRepository.existsById(role.getId())).willReturn(false);

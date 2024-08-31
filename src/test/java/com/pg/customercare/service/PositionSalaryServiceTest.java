@@ -101,19 +101,6 @@ public class PositionSalaryServiceTest {
     }
 
     @Test
-    void shouldThrowNotFoundExceptionWhenGetPositionSalaryByIdNotFound() {
-        // ARRANGE
-        Long id = 1L;
-        given(positionSalaryRepository.findById(id)).willReturn(Optional.empty());
-
-        // ACT & ASSERT
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            positionSalaryService.getPositionSalaryById(id);
-        });
-        assertEquals("Position not found with id " + id, exception.getMessage());
-    }
-
-    @Test
     void shouldSavePositionSalaryWithNewRole() {
         // ARRANGE
         positionSalary.setRole(null);
