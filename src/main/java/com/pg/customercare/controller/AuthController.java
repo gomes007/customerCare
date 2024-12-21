@@ -9,6 +9,7 @@ import com.pg.customercare.service.UserService;
 import com.pg.customercare.util.JwtUtil;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +26,46 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * AuthController handles authentication and registration requests.
+ * 
+ * This controller provides endpoints for user login and registration.
+ * It uses various services to authenticate users, generate JWT tokens,
+ * and register new users.
+ * 
+ * Endpoints:
+ * - POST /api/auth/login: Authenticates a user and returns a JWT token.
+ * - POST /api/auth/register: Registers a new user.
+ * 
+ * Dependencies:
+ * - AuthenticationManager: Manages authentication.
+ * - JwtUtil: Utility class for generating JWT tokens.
+ * - UserService: Service for user-related operations.
+ * - EmployeeService: Service for employee-related operations.
+ * - PasswordEncoder: Encodes passwords.
+ * 
+ * Logging:
+ * - Uses SLF4J Logger for logging events.
+ * 
+ * Error Handling:
+ * - Returns appropriate HTTP status codes and error messages for various error scenarios.
+ * 
+ * Example usage:
+ * - To authenticate a user, send a POST request to /api/auth/login with email and password.
+ * - To register a new user, send a POST request to /api/auth/register with email, password, and employeeId.
+ * 
+ * Note:
+ * - Ensure that email and password are provided in the request body for both endpoints.
+ * - Ensure that employeeId is provided and valid for the registration endpoint.
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
+  /**
+   * Logger instance for logging events in the AuthController class.
+   * Utilizes the LoggerFactory to obtain a logger specific to this class.
+   */
   private static final Logger logger = LoggerFactory.getLogger(
     AuthController.class
   );
@@ -52,37 +89,37 @@ public class AuthController {
   public ResponseEntity<Map<String, Object>> authenticate(
     @RequestBody Map<String, String> loginRequest
   ) {
-    String email = loginRequest.get("email");
-    String password = loginRequest.get("password");
+    String email = loginRequest.getOrDefault("email", "");
+    String password = loginRequest.getOrDefault("password", "");
 
-    logger.debug("Tentando autenticar usuário com email: {}", email);
+    logger.debug("Attempting to authenticate user with email: {}", email);
 
     if (
-      email == null || email.isEmpty() || password == null || password.isEmpty()
+      email.isEmpty() || password.isEmpty()
     ) {
-      logger.error("Email e senha são obrigatórios");
+      logger.error("Email and password are required");
       return ResponseEntity
         .badRequest()
         .body(Map.of("error", "Email and password are required"));
     }
 
     try {
-      // Autentica o usuário
+      // Authenticate the user
       Authentication authentication = authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(email, password)
       );
-      SecurityContextHolder.getContext().setAuthentication(authentication);
-
       User user = userService.findUserByEmail(email);
       if (user == null) {
-        logger.error("Usuário não encontrado após autenticação: {}", email);
+        logger.error("User not found after authentication: {}", email);
         return ResponseEntity
           .status(HttpStatus.UNAUTHORIZED)
           .body(Map.of("error", "Invalid email or password"));
       }
 
-      // Gera o token JWT
-      String token = jwtUtil.generateToken(email);
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      // Generate the JWT token
+      String token = jwtUtil.generateToken(user.getId().toString());
 
       Map<String, Object> response = new HashMap<>();
       response.put("token", token);
@@ -90,15 +127,15 @@ public class AuthController {
       response.put("employeeName", user.getEmployee().getName());
       response.put("employeeId", user.getEmployee().getId());
 
-      logger.debug("Usuário autenticado com sucesso: {}", email);
+      logger.debug("User successfully authenticated: {}", email);
       return ResponseEntity.ok(response);
     } catch (BadCredentialsException e) {
-      logger.error("Credenciais inválidas para o usuário: {}", email);
+      logger.error("Invalid credentials for user: {}", email);
       return ResponseEntity
         .status(HttpStatus.UNAUTHORIZED)
         .body(Map.of("error", "Invalid email or password"));
     } catch (Exception e) {
-      logger.error("Erro inesperado ao autenticar usuário: {}", email, e);
+      logger.error("Unexpected error while authenticating user: {}", email, e);
       return ResponseEntity
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .body(Map.of("error", "An unexpected error occurred"));
@@ -142,7 +179,7 @@ public class AuthController {
     
     User user = new User();
     user.setEmail(email);
-    user.setPassword(password);
+    user.setPassword(passwordEncoder.encode(password));
     user.setEmployee(employee);
     user.setRole(role);
 
