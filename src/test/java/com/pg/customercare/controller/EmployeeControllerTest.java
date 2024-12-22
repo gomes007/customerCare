@@ -1,11 +1,16 @@
 package com.pg.customercare.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pg.customercare.model.Dependent;
-import com.pg.customercare.model.Employee;
-import com.pg.customercare.model.PositionSalary;
-import com.pg.customercare.model.ENUM.RelationshipType;
-import com.pg.customercare.service.EmployeeService;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,19 +22,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pg.customercare.model.Dependent;
+import com.pg.customercare.model.Employee;
+import com.pg.customercare.model.PositionSalary;
+import com.pg.customercare.model.ENUM.RelationshipType;
+import com.pg.customercare.service.EmployeeService;
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(EmployeeController.class)

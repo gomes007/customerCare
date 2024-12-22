@@ -1,56 +1,62 @@
 package com.pg.customercare.util;
 
-import java.util.Date;
-import java.security.Key;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import java.security.Key;
+import java.util.Date;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 public class JwtUtil {
 
-    private Key secretKey;
+  private Key secretKey;
 
-    @Value("${jwt.expiration}")
-    private long jwtExpiration;
+  @Value("${jwt.secret}")
+  private String jwtSecret;
 
-    public JwtUtil() {
-        // Gera uma chave segura para o algoritmo HS512
-        this.secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
-    }
+  @Value("${jwt.expiration}")
+  private long jwtExpiration;
 
-    public String generateToken(String username) {
-        return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(secretKey)
-                .compact();
-    }
+  @PostConstruct
+  public void init() {
+    this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+  }
 
-    public String extractUsername(String token) {
-        return getClaims(token).getSubject();
-    }
+  // Gera o token JWT com o e-mail como "sub"
+  public String generateToken(String username) {
+    return Jwts.builder()
+            .setSubject(username) // "sub" no JWT será o e-mail do usuário
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+            .signWith(secretKey)
+            .compact();
+  }
 
-    public boolean validateToken(String token, String username) {
-        String extractedUsername = extractUsername(token);
-        return extractedUsername.equals(username) && !isTokenExpired(token);
-    }
+  // Extrai o campo "sub" do token (e-mail do usuário)
+  public String extractUsername(String token) {
+    return getClaims(token).getSubject();
+  }
 
-    private boolean isTokenExpired(String token) {
-        return getClaims(token).getExpiration().before(new Date());
-    }
+  // Valida o token comparando o username e verificando a expiração
+  public boolean validateToken(String token, String username) {
+    String extractedUsername = extractUsername(token);
+    return extractedUsername.equals(username) && !isTokenExpired(token);
+  }
 
-    private Claims getClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-    }
+  // Verifica se o token expirou
+  private boolean isTokenExpired(String token) {
+    return getClaims(token).getExpiration().before(new Date());
+  }
+
+  // Extrai as Claims do token
+  private Claims getClaims(String token) {
+    return Jwts.parserBuilder()
+            .setSigningKey(secretKey)
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
+  }
 }
