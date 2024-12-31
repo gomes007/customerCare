@@ -20,15 +20,18 @@ import com.pg.customercare.model.Employee;
 import com.pg.customercare.service.EmployeeService;
 
 /**
- * EmployeeController is a REST controller that handles HTTP requests for managing employees.
- * It provides endpoints for creating, updating, retrieving, and deleting employees.
+ * EmployeeController is a REST controller that handles HTTP requests for
+ * managing employees.
+ * It provides endpoints for creating, updating, retrieving, and deleting
+ * employees.
  * 
  * Endpoints:
  * 
  * - POST /api/employees: Creates a new employee.
  * - DELETE /api/employees/{id}: Deletes an employee by their ID.
  * - GET /api/employees/{id}: Retrieves an employee by their ID.
- * - GET /api/employees/position/{position}: Retrieves employees by their position.
+ * - GET /api/employees/position/{position}: Retrieves employees by their
+ * position.
  * - POST /api/employees/{id}: Updates an existing employee by their ID.
  * 
  * The controller uses EmployeeService to perform the actual operations.
@@ -54,6 +57,12 @@ public class EmployeeController {
         return ResponseEntity.ok(savedEmployee);
     }
 
+    @GetMapping()
+    public ResponseEntity<List<Employee>> getAllEmployees() {
+        List<Employee> employees = employeeService.getAllEmployees();
+        return ResponseEntity.ok(employees);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
         employeeService.deleteEmployee(id);
@@ -68,7 +77,6 @@ public class EmployeeController {
         Employee employee = employeeService.getEmployeeById(id);
         return ResponseEntity.ok(employee);
     }
-    
 
     @GetMapping("/position/{position}")
     public ResponseEntity<List<Employee>> getEmployeesByPosition(

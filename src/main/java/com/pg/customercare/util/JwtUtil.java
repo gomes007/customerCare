@@ -28,7 +28,7 @@ public class JwtUtil {
   // Gera o token JWT com o e-mail como "sub"
   public String generateToken(String username) {
     return Jwts.builder()
-            .setSubject(username) // "sub" no JWT será o e-mail do usuário
+            .setSubject(username)
             .setIssuedAt(new Date())
             .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
             .signWith(secretKey)
